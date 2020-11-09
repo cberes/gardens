@@ -10,8 +10,8 @@ Also, you can use this app to remember seeds you've planted while you wait for t
 
 ## History
 
-This started as a (campsite manager using Spring Boot)[https://github.com/cberes/campsites]
-and then another attempt at a (campsite manager implemented as a serverless web app)[https://github.com/cberes/ohboywerecamping].
+This started as a [campsite manager using Spring Boot](https://github.com/cberes/campsites)
+and then another attempt at a [campsite manager implemented as a serverless web app](https://github.com/cberes/ohboywerecamping).
 Those projects proved to be too large for my rapidly diminishing spare time.
 However, I wanted to complete a personal project with the tools I use professionally: Java, Javascript, Vue, Spring, and AWS to name a few.
 So I'm implementing a much smaller web app that's like a slice of the original campsite manager.
