@@ -23,12 +23,11 @@ public final class Main {
 
     private static Map<String, Supplier<RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>>> handlers() {
         return Map.of(
-                "read_availability", Lambdas.LiveReadAvailabilityLambda::new,
-                "read_campground", Lambdas.LiveReadCampgroundLambda::new,
-                "read_campsite", Lambdas.LiveReadCampsiteLambda::new,
-                "read_campsite_list", Lambdas.LiveReadCampsiteListLambda::new,
-                "create_order", Lambdas.LiveCreateOrderLambda::new,
-                "read_order", Lambdas.LiveReadOrderLambda::new,
-                "read_order_list", Lambdas.LiveReadOrderListLambda::new);
+                "read_garden_list", Lambdas.LiveReadGardenListLambda::new,
+                "create_gardener", Lambdas.LiveCreateGardenerLambda::new,
+                "delete_plant", Lambdas.LiveDeletePlantLambda::new,
+                "edit_plant", Lambdas.LiveEditPlantLambda::new,
+                "read_plant", Lambdas.LiveReadPlantLambda::new,
+                "read_plant_list", Lambdas.LiveReadPlantListLambda::new);
     }
 }

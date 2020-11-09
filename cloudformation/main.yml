@@ -130,6 +130,78 @@ Resources:
                 Resource:
                   - !Ref RuntimeClassPathLambdaLayer
 
+  GardenerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ['_', ["GARDENER", !Ref EnvironmentName]]
+      BillingMode: 'PAY_PER_REQUEST'
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+        - AttributeName: "EMAIL"
+          AttributeType: "S"
+        - AttributeName: "JOINED"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+
+  PlantTable:
+    Type: AWS::DynamoDB::Table
+    DependsOn: "GardenerTable"
+    Properties:
+      TableName: !Join ['_', ["PLANT", !Ref EnvironmentName]]
+      BillingMode: 'PAY_PER_REQUEST'
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+        - AttributeName: "GARDENER_ID"
+          AttributeType: "S"
+        - AttributeName: "NAME"
+          AttributeType: "S"
+        - AttributeName: "NAME_ALT"
+          AttributeType: "S"
+        - AttributeName: "LIGHT"
+          AttributeType: "S"
+        - AttributeName: "MOISTURE"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        - IndexName: "PLANTS_BY_GARDENER_ID"
+          KeySchema:
+            - AttributeName: "GARDENER_ID"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+
+  GardenPlantTable:
+    Type: AWS::DynamoDB::Table
+    DependsOn: "PlantTable"
+    Properties:
+      TableName: !Join ['_', ["GARDEN_PLANT", !Ref EnvironmentName]]
+      BillingMode: 'PAY_PER_REQUEST'
+      AttributeDefinitions:
+        - AttributeName: "ID"
+          AttributeType: "S"
+        - AttributeName: "GARDENER_ID"
+          AttributeType: "S"
+        - AttributeName: "GARDEN"
+          AttributeType: "S"
+        - AttributeName: "PLANTED"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ID"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        - IndexName: "GARDENS_BY_GARDENER_ID"
+          KeySchema:
+            - AttributeName: "GARDENER_ID"
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+
   CampgroundTable:
     Type: AWS::DynamoDB::Table
     Properties:

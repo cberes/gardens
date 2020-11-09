@@ -1,54 +1,47 @@
 package com.ohboywerecamping.webapp;
 
-import com.ohboywerecamping.webapp.availability.ReadAvailabilityLambda;
-import com.ohboywerecamping.webapp.campground.ReadCampgroundLambda;
-import com.ohboywerecamping.webapp.campsite.ReadCampsiteLambda;
-import com.ohboywerecamping.webapp.campsite.ReadCampsiteListLambda;
-import com.ohboywerecamping.webapp.order.CreateOrderLambda;
-import com.ohboywerecamping.webapp.order.ReadOrderLambda;
-import com.ohboywerecamping.webapp.order.ReadOrderListLambda;
+import com.ohboywerecamping.webapp.garden.ReadGardenListLambda;
+import com.ohboywerecamping.webapp.gardener.CreateGardenerLambda;
+import com.ohboywerecamping.webapp.plant.DeletePlantLambda;
+import com.ohboywerecamping.webapp.plant.EditPlantLambda;
+import com.ohboywerecamping.webapp.plant.ReadPlantLambda;
+import com.ohboywerecamping.webapp.plant.ReadPlantListLambda;
 import com.ohboywerecamping.webapp.util.JsonUtils;
 
 public final class Lambdas {
-    public static class LiveReadAvailabilityLambda extends ReadAvailabilityLambda {
-        public LiveReadAvailabilityLambda() {
-            super(Singletons.availabilityService());
+    public static class LiveReadGardenListLambda extends ReadGardenListLambda {
+        public LiveReadGardenListLambda() {
+            super(Singletons.gardenComponent(), Singletons.gardenerComponent());
         }
     }
 
-    public static class LiveReadCampgroundLambda extends ReadCampgroundLambda {
-        public LiveReadCampgroundLambda() {
-            super(Singletons.campgroundComponent());
+    public static class LiveCreateGardenerLambda extends CreateGardenerLambda {
+        public LiveCreateGardenerLambda() {
+            super(Singletons.gardenerComponent());
         }
     }
 
-    public static class LiveReadCampsiteLambda extends ReadCampsiteLambda {
-        public LiveReadCampsiteLambda() {
-            super(Singletons.campsiteComponent());
+    public static class LiveDeletePlantLambda extends DeletePlantLambda {
+        public LiveDeletePlantLambda() {
+            super(Singletons.plantComponent(), Singletons.gardenerComponent());
         }
     }
 
-    public static class LiveReadCampsiteListLambda extends ReadCampsiteListLambda {
-        public LiveReadCampsiteListLambda() {
-            super(Singletons.campsiteComponent());
+    public static class LiveEditPlantLambda extends EditPlantLambda {
+        public LiveEditPlantLambda() {
+            super(JsonUtils.jackson(), Singletons.plantComponent(), Singletons.gardenerComponent());
         }
     }
 
-    public static class LiveCreateOrderLambda extends CreateOrderLambda {
-        public LiveCreateOrderLambda() {
-            super(JsonUtils.jackson(), Singletons.orderComponent(), Singletons.customerComponent());
+    public static class LiveReadPlantLambda extends ReadPlantLambda {
+        public LiveReadPlantLambda() {
+            super(Singletons.plantComponent(), Singletons.gardenerComponent());
         }
     }
 
-    public static class LiveReadOrderLambda extends ReadOrderLambda {
-        public LiveReadOrderLambda() {
-            super(Singletons.orderComponent(), Singletons.customerComponent());
-        }
-    }
-
-    public static class LiveReadOrderListLambda extends ReadOrderListLambda {
-        public LiveReadOrderListLambda() {
-            super(Singletons.orderComponent(), Singletons.customerComponent());
+    public static class LiveReadPlantListLambda extends ReadPlantListLambda {
+        public LiveReadPlantListLambda() {
+            super(Singletons.plantComponent(), Singletons.gardenerComponent());
         }
     }
 

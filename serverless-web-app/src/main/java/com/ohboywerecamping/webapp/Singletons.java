@@ -1,25 +1,17 @@
 package com.ohboywerecamping.webapp;
 
-import com.ohboywerecamping.area.AreaRepository;
-import com.ohboywerecamping.availability.AvailabilityService;
-import com.ohboywerecamping.campground.CampgroundComponent;
-import com.ohboywerecamping.campground.CampgroundComponentImpl;
-import com.ohboywerecamping.campground.CampgroundRepository;
-import com.ohboywerecamping.campsite.CampsiteComponent;
-import com.ohboywerecamping.campsite.CampsiteComponentImpl;
-import com.ohboywerecamping.campsite.CampsiteRepository;
-import com.ohboywerecamping.customer.CustomerComponent;
-import com.ohboywerecamping.customer.CustomerComponentImpl;
-import com.ohboywerecamping.customer.CustomerRepository;
-import com.ohboywerecamping.order.OrderComponent;
-import com.ohboywerecamping.order.OrderComponentImpl;
-import com.ohboywerecamping.order.OrderRepository;
-import com.ohboywerecamping.reservation.ReservationRepository;
-import com.ohboywerecamping.webapp.campground.DynamoCampgroundRepository;
-import com.ohboywerecamping.webapp.campsite.DynamoCampsiteRepository;
-import com.ohboywerecamping.webapp.customer.DynamoCustomerRepository;
-import com.ohboywerecamping.webapp.order.DynamoOrderRepository;
-import com.ohboywerecamping.webapp.reservation.DynamoReservationRepository;
+import com.ohboywerecamping.garden.GardenComponent;
+import com.ohboywerecamping.garden.GardenComponentImpl;
+import com.ohboywerecamping.garden.GardenRepository;
+import com.ohboywerecamping.gardener.GardenerComponent;
+import com.ohboywerecamping.gardener.GardenerComponentImpl;
+import com.ohboywerecamping.gardener.GardenerRepository;
+import com.ohboywerecamping.plant.PlantComponent;
+import com.ohboywerecamping.plant.PlantComponentImpl;
+import com.ohboywerecamping.plant.PlantRepository;
+import com.ohboywerecamping.webapp.garden.DynamoGardenRepository;
+import com.ohboywerecamping.webapp.gardener.DynamoGardenerRepository;
+import com.ohboywerecamping.webapp.plant.DynamoPlantRepository;
 import com.ohboywerecamping.webapp.util.AwsUtils;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -27,17 +19,12 @@ final class Singletons {
     private static final Singletons instance = new Singletons();
 
     private DynamoDbClient ddb;
-    private AreaRepository areas;
-    private CampgroundRepository campgrounds;
-    private CampsiteRepository campsites;
-    private CustomerRepository customers;
-    private OrderRepository orders;
-    private ReservationRepository reservations;
-    private AvailabilityService availabilityService;
-    private CampgroundComponent campgroundComponent;
-    private CampsiteComponent campsiteComponent;
-    private CustomerComponent customerComponent;
-    private OrderComponent orderComponent;
+    private GardenRepository gardens;
+    private GardenerRepository gardeners;
+    private PlantRepository plants;
+    private GardenComponent gardenComponent;
+    private GardenerComponent gardenerComponent;
+    private PlantComponent plantComponent;
 
     private Singletons() {
     }
@@ -49,73 +36,45 @@ final class Singletons {
         return instance.ddb;
     }
 
-    static CampgroundRepository campgrounds() {
-        if (instance.campgrounds == null) {
-            instance.campgrounds = new DynamoCampgroundRepository(dynamo());
+    static GardenRepository gardens() {
+        if (instance.gardens == null) {
+            instance.gardens = new DynamoGardenRepository(dynamo());
         }
-        return instance.campgrounds;
+        return instance.gardens;
     }
 
-    static CampsiteRepository campsites() {
-        if (instance.campsites == null) {
-            instance.campsites = new DynamoCampsiteRepository(dynamo());
+    static GardenerRepository gardeners() {
+        if (instance.gardeners == null) {
+            instance.gardeners = new DynamoGardenerRepository(dynamo());
         }
-        return instance.campsites;
+        return instance.gardeners;
     }
 
-    static CustomerRepository customers() {
-        if (instance.customers == null) {
-            instance.customers = new DynamoCustomerRepository(dynamo());
+    static PlantRepository plants() {
+        if (instance.plants == null) {
+            instance.plants = new DynamoPlantRepository(dynamo());
         }
-        return instance.customers;
+        return instance.plants;
     }
 
-    static OrderRepository orders() {
-        if (instance.orders == null) {
-            instance.orders = new DynamoOrderRepository(dynamo());
+    static GardenComponent gardenComponent() {
+        if (instance.gardenComponent == null) {
+            instance.gardenComponent = new GardenComponentImpl(gardens());
         }
-        return instance.orders;
+        return instance.gardenComponent;
     }
 
-    static ReservationRepository reservations() {
-        if (instance.reservations == null) {
-            instance.reservations = new DynamoReservationRepository(dynamo());
+    static GardenerComponent gardenerComponent() {
+        if (instance.gardenerComponent == null) {
+            instance.gardenerComponent = new GardenerComponentImpl(gardeners());
         }
-        return instance.reservations;
+        return instance.gardenerComponent;
     }
 
-    static AvailabilityService availabilityService() {
-        if (instance.availabilityService == null) {
-            instance.availabilityService = new AvailabilityService(null, campsites(), reservations());
+    static PlantComponent plantComponent() {
+        if (instance.plantComponent == null) {
+            instance.plantComponent = new PlantComponentImpl(plants(), gardens());
         }
-        return instance.availabilityService;
-    }
-
-    static CampgroundComponent campgroundComponent() {
-        if (instance.campgroundComponent == null) {
-            instance.campgroundComponent = new CampgroundComponentImpl(campgrounds());
-        }
-        return instance.campgroundComponent;
-    }
-
-    static CampsiteComponent campsiteComponent() {
-        if (instance.campsiteComponent == null) {
-            instance.campsiteComponent = new CampsiteComponentImpl(campsites());
-        }
-        return instance.campsiteComponent;
-    }
-
-    static CustomerComponent customerComponent() {
-        if (instance.customerComponent == null) {
-            instance.customerComponent = new CustomerComponentImpl(customers());
-        }
-        return instance.customerComponent;
-    }
-
-    static OrderComponent orderComponent() {
-        if (instance.orderComponent == null) {
-            instance.orderComponent = new OrderComponentImpl(customers(), orders(), campsites(), reservations());
-        }
-        return instance.orderComponent;
+        return instance.plantComponent;
     }
 }
