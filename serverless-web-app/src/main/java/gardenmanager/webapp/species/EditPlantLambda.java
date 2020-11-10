@@ -1,4 +1,4 @@
-package gardenmanager.webapp.plant;
+package gardenmanager.webapp.species;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -9,43 +9,43 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gardenmanager.domain.Gardener;
-import gardenmanager.domain.Plant;
+import gardenmanager.domain.Species;
 import gardenmanager.gardener.GardenerComponent;
-import gardenmanager.plant.PlantComponent;
+import gardenmanager.species.SpeciesComponent;
 import gardenmanager.webapp.util.Cognito;
 import gardenmanager.webapp.util.JsonUtils;
 import gardenmanager.webapp.util.Responses;
 
 public class EditPlantLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     public static class Request {
-        private Plant plant;
+        private Species species;
 
-        public Plant getPlant() {
-            return plant;
+        public Species getPlant() {
+            return species;
         }
 
-        public void setPlant(final Plant plant) {
-            this.plant = plant;
+        public void setPlant(final Species species) {
+            this.species = species;
         }
     }
 
     public static class Response {
-        private final Plant plant;
+        private final Species species;
 
-        public Response(final Plant plant) {
-            this.plant = plant;
+        public Response(final Species species) {
+            this.species = species;
         }
 
-        public Plant getPlant() {
-            return plant;
+        public Species getPlant() {
+            return species;
         }
     }
 
     private final ObjectMapper jackson;
-    private final PlantComponent plants;
+    private final SpeciesComponent plants;
     private final GardenerComponent gardeners;
 
-    public EditPlantLambda(final ObjectMapper jackson, final PlantComponent plants, final GardenerComponent gardeners) {
+    public EditPlantLambda(final ObjectMapper jackson, final SpeciesComponent plants, final GardenerComponent gardeners) {
         this.jackson = jackson;
         this.plants = plants;
         this.gardeners = gardeners;
@@ -66,9 +66,9 @@ public class EditPlantLambda implements RequestHandler<APIGatewayProxyRequestEve
 
         final Optional<Gardener> gardener = Cognito.username(input).flatMap(gardeners::findGardenerByEmail);
 
-        final Plant plant = request.getPlant();
-        gardener.map(Gardener::getId).ifPresent(plant::setGardenerId);
-        plants.save(plant);
-        return Responses.created(JsonUtils.toJson(new Response(plant)));
+        final Species species = request.getPlant();
+        gardener.map(Gardener::getId).ifPresent(species::setGardenerId);
+        plants.save(species);
+        return Responses.created(JsonUtils.toJson(new Response(species)));
     }
 }

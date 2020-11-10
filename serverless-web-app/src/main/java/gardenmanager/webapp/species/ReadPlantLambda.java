@@ -1,37 +1,39 @@
-package gardenmanager.webapp.plant;
+package gardenmanager.webapp.species;
 
-import java.util.List;
+import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import gardenmanager.domain.Gardener;
-import gardenmanager.domain.Plant;
+import gardenmanager.domain.Species;
 import gardenmanager.gardener.GardenerComponent;
-import gardenmanager.plant.PlantComponent;
+import gardenmanager.species.SpeciesComponent;
 import gardenmanager.webapp.util.Cognito;
+import gardenmanager.webapp.util.ErrorMessage;
 import gardenmanager.webapp.util.JsonUtils;
+import gardenmanager.webapp.util.Responses;
 
 import static gardenmanager.webapp.util.Responses.ok;
 
-public class ReadPlantListLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class ReadPlantLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     public static class Response {
-        private final List<Plant> plants;
+        private final Species species;
 
-        public Response(final List<Plant> plants) {
-            this.plants = plants;
+        public Response(final Species species) {
+            this.species = species;
         }
 
-        public List<Plant> getPlants() {
-            return plants;
+        public Species getPlant() {
+            return species;
         }
     }
 
-    private final PlantComponent plants;
+    private final SpeciesComponent plants;
     private final GardenerComponent gardeners;
 
-    public ReadPlantListLambda(final PlantComponent plants, final GardenerComponent gardeners) {
+    public ReadPlantLambda(final SpeciesComponent plants, final GardenerComponent gardeners) {
         this.plants = plants;
         this.gardeners = gardeners;
     }
@@ -42,12 +44,19 @@ public class ReadPlantListLambda implements RequestHandler<APIGatewayProxyReques
 
         context.getLogger().log("Authenticated username is  " + Cognito.username(input).orElse(null));
 
+        final String plantId = input.getPathParameters().get("plantId");
+
         final String gardenerId = Cognito.username(input)
                 .flatMap(gardeners::findGardenerByEmail)
                 .map(Gardener::getId)
                 .orElse("example");
 
-        final List<Plant> found = plants.findPlantsByGardenerId(gardenerId);
-        return ok(JsonUtils.toJson(new Response(found)));
+        final Optional<Species> found = plants.findPlantById(plantId).filter(plant -> plant.getGardenerId().equals(gardenerId));
+
+        if (found.isEmpty()) {
+            return Responses.notFound(JsonUtils.toJson(new ErrorMessage("Plant not found: " + plantId)));
+        }
+
+        return Responses.ok(JsonUtils.toJson(new Response(found.get())));
     }
 }

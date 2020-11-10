@@ -1,11 +1,11 @@
 package gardenmanager.webapp;
 
-import gardenmanager.webapp.garden.ReadGardenListLambda;
+import gardenmanager.webapp.plant.ReadGardenListLambda;
 import gardenmanager.webapp.gardener.CreateGardenerLambda;
-import gardenmanager.webapp.plant.DeletePlantLambda;
-import gardenmanager.webapp.plant.EditPlantLambda;
-import gardenmanager.webapp.plant.ReadPlantLambda;
-import gardenmanager.webapp.plant.ReadPlantListLambda;
+import gardenmanager.webapp.species.DeletePlantLambda;
+import gardenmanager.webapp.species.EditPlantLambda;
+import gardenmanager.webapp.species.ReadPlantLambda;
+import gardenmanager.webapp.species.ReadPlantListLambda;
 import gardenmanager.webapp.util.JsonUtils;
 
 public final class Lambdas {

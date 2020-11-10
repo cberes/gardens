@@ -1,17 +1,17 @@
 package gardenmanager.webapp;
 
-import gardenmanager.garden.GardenComponent;
-import gardenmanager.garden.GardenComponentImpl;
-import gardenmanager.garden.GardenRepository;
-import gardenmanager.gardener.GardenerComponent;
-import gardenmanager.gardener.GardenerComponentImpl;
-import gardenmanager.gardener.GardenerRepository;
 import gardenmanager.plant.PlantComponent;
 import gardenmanager.plant.PlantComponentImpl;
 import gardenmanager.plant.PlantRepository;
-import gardenmanager.webapp.garden.DynamoGardenRepository;
-import gardenmanager.webapp.gardener.DynamoGardenerRepository;
+import gardenmanager.gardener.GardenerComponent;
+import gardenmanager.gardener.GardenerComponentImpl;
+import gardenmanager.gardener.GardenerRepository;
+import gardenmanager.species.SpeciesComponent;
+import gardenmanager.species.SpeciesComponentImpl;
+import gardenmanager.species.SpeciesRepository;
 import gardenmanager.webapp.plant.DynamoPlantRepository;
+import gardenmanager.webapp.gardener.DynamoGardenerRepository;
+import gardenmanager.webapp.species.DynamoSpeciesRepository;
 import gardenmanager.webapp.util.AwsUtils;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
@@ -19,12 +19,12 @@ final class Singletons {
     private static final Singletons instance = new Singletons();
 
     private DynamoDbClient ddb;
-    private GardenRepository gardens;
-    private GardenerRepository gardeners;
     private PlantRepository plants;
-    private GardenComponent gardenComponent;
-    private GardenerComponent gardenerComponent;
+    private GardenerRepository gardeners;
+    private SpeciesRepository species;
     private PlantComponent plantComponent;
+    private GardenerComponent gardenerComponent;
+    private SpeciesComponent speciesComponent;
 
     private Singletons() {
     }
@@ -36,11 +36,11 @@ final class Singletons {
         return instance.ddb;
     }
 
-    static GardenRepository gardens() {
-        if (instance.gardens == null) {
-            instance.gardens = new DynamoGardenRepository(dynamo());
+    static PlantRepository gardens() {
+        if (instance.plants == null) {
+            instance.plants = new DynamoPlantRepository(dynamo());
         }
-        return instance.gardens;
+        return instance.plants;
     }
 
     static GardenerRepository gardeners() {
@@ -50,18 +50,18 @@ final class Singletons {
         return instance.gardeners;
     }
 
-    static PlantRepository plants() {
-        if (instance.plants == null) {
-            instance.plants = new DynamoPlantRepository(dynamo());
+    static SpeciesRepository plants() {
+        if (instance.species == null) {
+            instance.species = new DynamoSpeciesRepository(dynamo());
         }
-        return instance.plants;
+        return instance.species;
     }
 
-    static GardenComponent gardenComponent() {
-        if (instance.gardenComponent == null) {
-            instance.gardenComponent = new GardenComponentImpl(gardens());
+    static PlantComponent gardenComponent() {
+        if (instance.plantComponent == null) {
+            instance.plantComponent = new PlantComponentImpl(gardens());
         }
-        return instance.gardenComponent;
+        return instance.plantComponent;
     }
 
     static GardenerComponent gardenerComponent() {
@@ -71,10 +71,10 @@ final class Singletons {
         return instance.gardenerComponent;
     }
 
-    static PlantComponent plantComponent() {
-        if (instance.plantComponent == null) {
-            instance.plantComponent = new PlantComponentImpl(plants(), gardens());
+    static SpeciesComponent plantComponent() {
+        if (instance.speciesComponent == null) {
+            instance.speciesComponent = new SpeciesComponentImpl(plants(), gardens());
         }
-        return instance.plantComponent;
+        return instance.speciesComponent;
     }
 }

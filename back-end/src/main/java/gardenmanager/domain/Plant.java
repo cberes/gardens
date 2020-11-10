@@ -1,15 +1,13 @@
 package gardenmanager.domain;
 
-import java.util.List;
+import java.time.ZonedDateTime;
 
 public class Plant {
     private String id;
     private String gardenerId;
-    private String name;
-    private String alternateName;
-    private MoisturePreference moisture;
-    private LightPreference light;
-    private List<GardenPlant> gardens;
+    private String speciesId;
+    private String garden;
+    private ZonedDateTime planted;
 
     public String getId() {
         return id;
@@ -27,43 +25,27 @@ public class Plant {
         this.gardenerId = gardenerId;
     }
 
-    public String getName() {
-        return name;
+    public String getSpeciesId() {
+        return speciesId;
     }
 
-    public void setName(final String name) {
-        this.name = name;
+    public void setSpeciesId(final String speciesId) {
+        this.speciesId = speciesId;
     }
 
-    public String getAlternateName() {
-        return alternateName;
+    public String getGarden() {
+        return garden;
     }
 
-    public void setAlternateName(final String alternateName) {
-        this.alternateName = alternateName;
+    public void setGarden(final String garden) {
+        this.garden = garden;
     }
 
-    public MoisturePreference getMoisture() {
-        return moisture;
+    public ZonedDateTime getPlanted() {
+        return planted;
     }
 
-    public void setMoisture(final MoisturePreference moisture) {
-        this.moisture = moisture;
-    }
-
-    public LightPreference getLight() {
-        return light;
-    }
-
-    public void setLight(final LightPreference light) {
-        this.light = light;
-    }
-
-    public List<GardenPlant> getGardens() {
-        return gardens;
-    }
-
-    public void setGardens(final List<GardenPlant> gardens) {
-        this.gardens = gardens;
+    public void setPlanted(final ZonedDateTime planted) {
+        this.planted = planted;
     }
 }
