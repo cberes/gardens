@@ -17,7 +17,8 @@ import static gardenmanager.webapp.util.DynamoUtils.s;
 import static java.util.stream.Collectors.toList;
 
 public class DynamoSpeciesRepository implements SpeciesRepository {
-    private final String tableName = "PLANT_" + AwsUtils.environmentName();
+    private final String tableName = "SPECIES_" + AwsUtils.environmentName();
+    private final String plantTableName = "PLANT_" + AwsUtils.environmentName();
     private final DynamoDbClient dynamo;
 
     public DynamoSpeciesRepository(final DynamoDbClient dynamo) {
@@ -25,23 +26,26 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
     }
 
     @Override
-    public Optional<Species> findById(final String id) {
+    public Optional<Species> findById(final String compositeId) {
+        final Id id = Id.fromString(compositeId);
         final QueryRequest request = QueryRequest.builder()
                 .tableName(tableName)
-                .projectionExpression("ID, GARDENER_ID, #name, NAME_ALT, LIGHT, MOISTURE")
+                .projectionExpression("GARDENER_ID, SPECIES_ID, #name, NAME_ALT, LIGHT, MOISTURE")
                 .consistentRead(false)
                 .expressionAttributeNames(Map.of(
                         "#name", "NAME"))
-                .expressionAttributeValues(Map.of(":id", s(id)))
-                .keyConditionExpression("ID = :id")
+                .expressionAttributeValues(Map.of(
+                        ":gardenerId", s(id.getGardenerId()),
+                        ":speciesId", s(id.getSpeciesId())))
+                .keyConditionExpression("GARDENER_ID = :gardenerId and SPECIES_ID = :speciesId")
                 .build();
         final QueryResponse response = dynamo.query(request);
-        return response.items().stream().map(DynamoSpeciesRepository::toPlant).findAny();
+        return response.items().stream().map(DynamoSpeciesRepository::toSpecies).findAny();
     }
 
-    private static Species toPlant(final Map<String, AttributeValue> item) {
+    private static Species toSpecies(final Map<String, AttributeValue> item) {
         Species species = new Species();
-        species.setId(item.get("ID").s());
+        species.setId(item.get("SPECIES_ID").s());
         species.setGardenerId(item.get("GARDENER_ID").s());
         species.setName(item.get("NAME").s());
         species.setAlternateName(item.get("NAME_ALT").s());
@@ -54,21 +58,14 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
     public List<Species> findAllByGardenerId(final String gardenerId) {
         final QueryRequest request = QueryRequest.builder()
                 .tableName(tableName)
-                .indexName("PLANTS_BY_GARDENER_ID")
-                .projectionExpression("ID")
+                .projectionExpression("GARDENER_ID, SPECIES_ID, #name, NAME_ALT, LIGHT, MOISTURE")
                 .consistentRead(false)
                 .expressionAttributeValues(Map.of(":gardener_id", s(gardenerId)))
                 .keyConditionExpression("GARDENER_ID = :gardener_id")
                 .build();
 
         final QueryResponse response = dynamo.query(request);
-        return response.items().stream()
-                .map(item -> item.get("ID").s())
-                .map(this::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .distinct()
-                .collect(toList());
+        return response.items().stream().map(DynamoSpeciesRepository::toSpecies).collect(toList());
     }
 
     @Override
@@ -99,7 +96,7 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
 
     private static Map<String, AttributeValue> toAttrMap(final Species species) {
         return Map.of(
-                "ID", s(species.getId()),
+                "SPECIES_ID", s(species.getId()),
                 "GARDENER_ID", s(species.getGardenerId()),
                 "#name", s(species.getName()),
                 "NAME_ALT", s(species.getAlternateName()),
@@ -112,7 +109,7 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
         final UpdateItemRequest request = UpdateItemRequest.builder()
                 .tableName(tableName)
                 .key(Map.of(
-                        "ID", s(species.getId()),
+                        "SPECIES_ID", s(species.getId()),
                         "GARDENER_ID", s(species.getGardenerId())))
                 .expressionAttributeNames(Map.of(
                         "#name", "NAME"))
@@ -128,11 +125,22 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
 
     @Override
     public void delete(final Species species) {
+        deletePlantsBySpecies(species);
+
         final DeleteItemRequest request = DeleteItemRequest.builder()
                 .tableName(tableName)
                 .key(Map.of(
-                        "ID", s(species.getId()),
+                        "SPECIES_ID", s(species.getId()),
                         "GARDENER_ID", s(species.getGardenerId())))
+                .build();
+        dynamo.deleteItem(request);
+    }
+
+    private void deletePlantsBySpecies(final Species species) {
+        final DeleteItemRequest request = DeleteItemRequest.builder()
+                .tableName(plantTableName)
+                .key(Map.of(
+                        "GARDENER_SPECIES_ID", s(new Id(species.getGardenerId(), species.getId()).toString())))
                 .build();
         dynamo.deleteItem(request);
     }

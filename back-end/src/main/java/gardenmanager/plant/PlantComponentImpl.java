@@ -8,15 +8,15 @@ import gardenmanager.domain.Plant;
 import static java.util.stream.Collectors.toList;
 
 public class PlantComponentImpl implements PlantComponent {
-    private final PlantRepository gardens;
+    private final PlantRepository plants;
 
-    public PlantComponentImpl(final PlantRepository gardens) {
-        this.gardens = gardens;
+    public PlantComponentImpl(final PlantRepository plants) {
+        this.plants = plants;
     }
 
     @Override
     public List<Garden> findGardensByGardenerId(final String gardenerId) {
-        return gardens.findAllByGardenerId(gardenerId).stream()
+        return plants.findAllByGardenerId(gardenerId).stream()
                 .map(PlantComponentImpl::toGarden)
                 .distinct()
                 .collect(toList());
@@ -27,5 +27,27 @@ public class PlantComponentImpl implements PlantComponent {
         garden.setGardenerId(plant.getGardenerId());
         garden.setName(plant.getGarden());
         return garden;
+    }
+
+    @Override
+    public List<Plant> findPlantsBySpeciesId(final String speciesId) {
+        return plants.findAllBySpeciesId(speciesId);
+    }
+
+    @Override
+    public String save(final Plant plant) {
+        requireGardenerId(plant);
+        return plants.save(plant);
+    }
+
+    private static void requireGardenerId(final Plant plant) {
+        if (plant.getGardenerId() == null || plant.getGardenerId().isEmpty()) {
+            throw new IllegalArgumentException("gardenerId is required");
+        }
+    }
+
+    @Override
+    public void delete(final Plant plant) {
+        plants.delete(plant);
     }
 }

@@ -11,12 +11,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
 import static gardenmanager.webapp.util.DynamoUtils.s;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 public class DynamoPlantRepository implements PlantRepository {
-    private final String tableName = "GARDEN_PLANT_" + AwsUtils.environmentName();
-    private final String plantTableName = "PLANT_" + AwsUtils.environmentName();
+    private final String tableName = "PLANT_" + AwsUtils.environmentName();
+    private final String speciesTableName = "SPECIES_" + AwsUtils.environmentName();
     private final DynamoDbClient dynamo;
 
     public DynamoPlantRepository(final DynamoDbClient dynamo) {
@@ -24,13 +23,16 @@ public class DynamoPlantRepository implements PlantRepository {
     }
 
     @Override
-    public Optional<Plant> findById(final String id) {
+    public Optional<Plant> findById(final String compositeId) {
+        final Id id = Id.fromString(compositeId);
         final QueryRequest request = QueryRequest.builder()
                 .tableName(tableName)
-                .projectionExpression("ID, GARDENER_ID, GARDEN, PLANTED")
+                .projectionExpression("GARDENER_SPECIES_ID, GARDEN, PLANTED")
                 .consistentRead(false)
-                .expressionAttributeValues(Map.of(":id", s(id)))
-                .keyConditionExpression("ID = :id")
+                .expressionAttributeValues(Map.of(
+                        ":id", s(compositeId),
+                        ":garden", s(id.getGarden())))
+                .keyConditionExpression("GARDENER_SPECIES_ID = :id and GARDEN = :garden")
                 .build();
         final QueryResponse response = dynamo.query(request);
         return response.items().stream().map(DynamoPlantRepository::toPlant).findAny();
@@ -38,57 +40,52 @@ public class DynamoPlantRepository implements PlantRepository {
 
     private static Plant toPlant(final Map<String, AttributeValue> item) {
         Plant plant = new Plant();
-        plant.setId(item.get("ID").s());
-        plant.setGardenerId(item.get("GARDENER_ID").s());
         plant.setGarden(item.get("GARDEN").s());
         plant.setPlanted(ZonedDateTime.parse(item.get("PLANTED").s()));
+        final gardenmanager.webapp.species.Id id =
+                gardenmanager.webapp.species.Id.fromString(item.get("GARDENER_SPECIES_ID").s());
+        plant.setGardenerId(id.getGardenerId());
+        plant.setSpeciesId(id.getSpeciesId());
+        plant.setId(id(plant));
         return plant;
     }
 
     @Override
     public List<Plant> findAllByGardenerId(final String gardenerId) {
+        // query the species table for all species belonging to the gardener
+        // to avoid the need for an index TODO is it worth it?
+        return findAllSpeciesIdsByGardenerId(gardenerId)
+                .map(speciesId -> new gardenmanager.webapp.species.Id(gardenerId, speciesId).toString())
+                .parallel() // TODO does the parallel stream help?
+                .flatMap(speciesId -> findAllBySpeciesId(speciesId).stream())
+                .collect(toList());
+    }
+
+    private java.util.stream.Stream<String> findAllSpeciesIdsByGardenerId(final String gardenerId) {
         final QueryRequest request = QueryRequest.builder()
-                .tableName(tableName)
-                .indexName("GARDENS_BY_GARDENER_ID")
-                .projectionExpression("ID")
+                .tableName(speciesTableName)
+                .projectionExpression("SPECIES_ID")
                 .consistentRead(false)
                 .expressionAttributeValues(Map.of(":gardener_id", s(gardenerId)))
                 .keyConditionExpression("GARDENER_ID = :gardener_id")
                 .build();
 
         final QueryResponse response = dynamo.query(request);
-        return response.items().stream()
-                .map(item -> item.get("ID").s())
-                .map(this::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(toList());
+        return response.items().stream().map(item -> item.get("SPECIES_ID").s());
     }
 
     @Override
-    public List<Plant> findAllByPlantId(final String plantId) {
-        // Query the plant table to get the gardener ID, then get plants by gardener, and filter by plant.
-        // It removes the need for an index. TODO is this worth it?
+    public List<Plant> findAllBySpeciesId(final String speciesId) {
         final QueryRequest request = QueryRequest.builder()
-                .tableName(plantTableName)
-                .projectionExpression("GARDENER_ID")
+                .tableName(tableName)
+                .projectionExpression("GARDENER_SPECIES_ID, GARDEN, PLANTED")
                 .consistentRead(false)
-                .expressionAttributeValues(Map.of(":id", s(plantId)))
-                .keyConditionExpression("ID = :id")
+                .expressionAttributeValues(Map.of(":gsId", s(speciesId)))
+                .keyConditionExpression("GARDENER_SPECIES_ID = :gsId")
                 .build();
 
         final QueryResponse response = dynamo.query(request);
-        return response.items().stream()
-                .map(item -> item.get("GARDENER_ID").s())
-                .findAny()
-                .map(gardenerId -> findGardensByPlantAndGardener(plantId, gardenerId))
-                .orElse(emptyList());
-    }
-
-    private List<Plant> findGardensByPlantAndGardener(final String plantId, final String gardenerId) {
-        return findAllByGardenerId(gardenerId).stream()
-                .filter(plant -> plant.getSpeciesId().equals(plantId))
-                .collect(toList());
+        return response.items().stream().map(DynamoPlantRepository::toPlant).collect(toList());
     }
 
     @Override
@@ -109,10 +106,7 @@ public class DynamoPlantRepository implements PlantRepository {
     }
 
     private static String id(final Plant plant) {
-        return String.join(":",
-                plant.getGardenerId(),
-                plant.getSpeciesId(),
-                plant.getGarden().toUpperCase(Locale.US));
+        return new Id(plant.getGardenerId(), plant.getSpeciesId(), plant.getGarden()).toString();
     }
 
     private void create(final Plant plant) {
@@ -125,21 +119,24 @@ public class DynamoPlantRepository implements PlantRepository {
 
     private static Map<String, AttributeValue> toAttrMap(final Plant plant) {
         return Map.of(
-                "ID", s(plant.getId()),
-                "GARDENER_ID", s(plant.getGardenerId()),
+                "GARDENER_SPECIES_ID", s(parentId(plant)),
                 "GARDEN", s(plant.getGarden()),
                 "PLANTED", s(plant.getPlanted().toString()));
     }
 
+    private static String parentId(final Plant plant) {
+        return new gardenmanager.webapp.species.Id(plant.getGardenerId(), plant.getSpeciesId()).toString();
+    }
+
     private void update(final Plant plant) {
-        final var attrMap = toAttrMap(plant);
+        final Id id = Id.fromString(plant.getId());
         final UpdateItemRequest request = UpdateItemRequest.builder()
                 .tableName(tableName)
                 .key(Map.of(
-                        "ID", s(plant.getId()),
-                        "GARDENER_ID", s(plant.getGardenerId())))
+                        "GARDENER_SPECIES_ID", s(parentId(plant)),
+                        "GARDEN", s(id.getGarden())))
                 .expressionAttributeValues(Map.of(
-                        ":garden", attrMap.get("GARDEN")))
+                        ":garden", s(plant.getGarden())))
                 .updateExpression("set GARDEN = :garden")
                 .build();
         dynamo.updateItem(request);
@@ -147,11 +144,12 @@ public class DynamoPlantRepository implements PlantRepository {
 
     @Override
     public void delete(final Plant plant) {
+        final Id id = Id.fromString(plant.getId());
         final DeleteItemRequest request = DeleteItemRequest.builder()
                 .tableName(tableName)
                 .key(Map.of(
-                        "ID", s(plant.getId()),
-                        "GARDENER_ID", s(plant.getGardenerId())))
+                        "GARDENER_SPECIES_ID", s(parentId(plant)),
+                        "GARDEN", s(id.getGarden())))
                 .build();
         dynamo.deleteItem(request);
     }

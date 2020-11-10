@@ -36,7 +36,7 @@ final class Singletons {
         return instance.ddb;
     }
 
-    static PlantRepository gardens() {
+    static PlantRepository plants() {
         if (instance.plants == null) {
             instance.plants = new DynamoPlantRepository(dynamo());
         }
@@ -50,16 +50,16 @@ final class Singletons {
         return instance.gardeners;
     }
 
-    static SpeciesRepository plants() {
+    static SpeciesRepository species() {
         if (instance.species == null) {
             instance.species = new DynamoSpeciesRepository(dynamo());
         }
         return instance.species;
     }
 
-    static PlantComponent gardenComponent() {
+    static PlantComponent plantComponent() {
         if (instance.plantComponent == null) {
-            instance.plantComponent = new PlantComponentImpl(gardens());
+            instance.plantComponent = new PlantComponentImpl(plants());
         }
         return instance.plantComponent;
     }
@@ -71,9 +71,9 @@ final class Singletons {
         return instance.gardenerComponent;
     }
 
-    static SpeciesComponent plantComponent() {
+    static SpeciesComponent speciesComponent() {
         if (instance.speciesComponent == null) {
-            instance.speciesComponent = new SpeciesComponentImpl(plants(), gardens());
+            instance.speciesComponent = new SpeciesComponentImpl(species());
         }
         return instance.speciesComponent;
     }

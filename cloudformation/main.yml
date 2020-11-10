@@ -146,16 +146,16 @@ Resources:
         - AttributeName: "ID"
           KeyType: "HASH"
 
-  PlantTable:
+  SpeciesTable:
     Type: AWS::DynamoDB::Table
     DependsOn: "GardenerTable"
     Properties:
-      TableName: !Join ['_', ["PLANT", !Ref EnvironmentName]]
+      TableName: !Join ['_', ["SPECIES", !Ref EnvironmentName]]
       BillingMode: 'PAY_PER_REQUEST'
       AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
         - AttributeName: "GARDENER_ID"
+          AttributeType: "S"
+        - AttributeName: "SPECIES_ID"
           AttributeType: "S"
         - AttributeName: "NAME"
           AttributeType: "S"
@@ -166,41 +166,29 @@ Resources:
         - AttributeName: "MOISTURE"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "ID"
+        - AttributeName: "GARDENER_ID"
           KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "PLANTS_BY_GARDENER_ID"
-          KeySchema:
-            - AttributeName: "GARDENER_ID"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
+        - AttributeName: "SPECIES_ID"
+          KeyType: "RANGE"
 
-  GardenPlantTable:
+  PlantTable:
     Type: AWS::DynamoDB::Table
-    DependsOn: "PlantTable"
+    DependsOn: "SpeciesTable"
     Properties:
-      TableName: !Join ['_', ["GARDEN_PLANT", !Ref EnvironmentName]]
+      TableName: !Join ['_', ["PLANT", !Ref EnvironmentName]]
       BillingMode: 'PAY_PER_REQUEST'
       AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "GARDENER_ID"
+        - AttributeName: "GARDENER_SPECIES_ID"
           AttributeType: "S"
         - AttributeName: "GARDEN"
           AttributeType: "S"
         - AttributeName: "PLANTED"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "ID"
+        - AttributeName: "GARDENER_SPECIES_ID"
           KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "GARDENS_BY_GARDENER_ID"
-          KeySchema:
-            - AttributeName: "GARDENER_ID"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
+        - AttributeName: "GARDEN"
+          KeyType: "RANGE"
 
   CampgroundTable:
     Type: AWS::DynamoDB::Table

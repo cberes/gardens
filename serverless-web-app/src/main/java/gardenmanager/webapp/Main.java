@@ -25,9 +25,9 @@ public final class Main {
         return Map.of(
                 "read_garden_list", Lambdas.LiveReadGardenListLambda::new,
                 "create_gardener", Lambdas.LiveCreateGardenerLambda::new,
-                "delete_plant", Lambdas.LiveDeletePlantLambda::new,
-                "edit_plant", Lambdas.LiveEditPlantLambda::new,
-                "read_plant", Lambdas.LiveReadPlantLambda::new,
-                "read_plant_list", Lambdas.LiveReadPlantListLambda::new);
+                "delete_species", Lambdas.LiveDeleteSpeciesLambda::new,
+                "edit_plants", Lambdas.LiveEditPlantsLambda::new,
+                "read_plants", Lambdas.LiveReadPlantsLambda::new,
+                "read_all_plants", Lambdas.LiveReadAllPlantsLambda::new);
     }
 }

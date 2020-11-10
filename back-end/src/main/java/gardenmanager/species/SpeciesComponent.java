@@ -6,9 +6,9 @@ import java.util.Optional;
 import gardenmanager.domain.Species;
 
 public interface SpeciesComponent {
-    Optional<Species> findPlantById(String id);
+    Optional<Species> findSpeciesById(String id);
 
-    List<Species> findPlantsByGardenerId(String gardenerId);
+    List<Species> findSpeciesByGardenerId(String gardenerId);
 
     String save(Species species);
 

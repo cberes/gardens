@@ -16,14 +16,12 @@ import gardenmanager.webapp.util.JsonUtils;
 import gardenmanager.webapp.util.Ok;
 import gardenmanager.webapp.util.*;
 
-import static gardenmanager.webapp.util.Responses.ok;
-
-public class DeletePlantLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    private final SpeciesComponent plants;
+public class DeleteSpeciesLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+    private final SpeciesComponent species;
     private final GardenerComponent gardeners;
 
-    public DeletePlantLambda(final SpeciesComponent plants, final GardenerComponent gardeners) {
-        this.plants = plants;
+    public DeleteSpeciesLambda(final SpeciesComponent species, final GardenerComponent gardeners) {
+        this.species = species;
         this.gardeners = gardeners;
     }
 
@@ -37,13 +35,13 @@ public class DeletePlantLambda implements RequestHandler<APIGatewayProxyRequestE
 
         final Optional<Gardener> gardener = Cognito.username(input).flatMap(gardeners::findGardenerByEmail);
         final Optional<Species> found = gardener.map(Gardener::getId).flatMap(gardenerId ->
-                plants.findPlantById(plantId).filter(plant -> plant.getGardenerId().equals(gardenerId)));
+                species.findSpeciesById(plantId).filter(plant -> plant.getGardenerId().equals(gardenerId)));
 
         if (found.isEmpty()) {
             return Responses.notFound(JsonUtils.toJson(new ErrorMessage("Plant not found: " + plantId)));
         }
 
-        plants.delete(found.get());
+        species.delete(found.get());
         return Responses.ok(JsonUtils.toJson(new Ok()));
     }
 }

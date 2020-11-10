@@ -1,7 +1,5 @@
 package gardenmanager.domain;
 
-import java.util.List;
-
 public class Species {
     private String id;
     private String gardenerId;
@@ -9,7 +7,6 @@ public class Species {
     private String alternateName;
     private MoisturePreference moisture;
     private LightPreference light;
-    private List<Plant> gardens;
 
     public String getId() {
         return id;
@@ -57,13 +54,5 @@ public class Species {
 
     public void setLight(final LightPreference light) {
         this.light = light;
-    }
-
-    public List<Plant> getGardens() {
-        return gardens;
-    }
-
-    public void setGardens(final List<Plant> gardens) {
-        this.gardens = gardens;
     }
 }

@@ -31,11 +31,11 @@ public class ReadGardenListLambda implements RequestHandler<APIGatewayProxyReque
         }
     }
 
-    private final PlantComponent gardens;
+    private final PlantComponent plants;
     private final GardenerComponent gardeners;
 
-    public ReadGardenListLambda(final PlantComponent gardens, final GardenerComponent gardeners) {
-        this.gardens = gardens;
+    public ReadGardenListLambda(final PlantComponent plants, final GardenerComponent gardeners) {
+        this.plants = plants;
         this.gardeners = gardeners;
     }
 
@@ -46,7 +46,7 @@ public class ReadGardenListLambda implements RequestHandler<APIGatewayProxyReque
         context.getLogger().log("Authenticated username is  " + Cognito.username(input).orElse(null));
 
         final Optional<Gardener> gardener = Cognito.username(input).flatMap(gardeners::findGardenerByEmail);
-        final List<Garden> found = gardener.map(Gardener::getId).map(gardens::findGardensByGardenerId).orElse(emptyList());
+        final List<Garden> found = gardener.map(Gardener::getId).map(plants::findGardensByGardenerId).orElse(emptyList());
         return Responses.ok(JsonUtils.toJson(new Response(found)));
     }
 }
