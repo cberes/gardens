@@ -2,7 +2,7 @@ plugins {
   id 'com.moowork.node' version '1.2.0'
 }
 
-group 'com.ohboywerecamping'
+group 'gardenmanager'
 version = projectVersion
 
 task assemble(type: NpmTask, dependsOn: 'npmInstall') {

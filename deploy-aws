@@ -10,8 +10,8 @@ env="$1"
 [ -n "$env" ] || die "Usage: ./deploy-aws ENVIRONMENT"
 
 # create our variables
-stack_name="ohboywerecamping-$env"
-s3_dest=s3://ohboywerecamping/web-app-dist/
+stack_name="gardenmanager-$env"
+s3_dest=s3://cberes-gardenmanager/web-app-dist/
 lambda_layer=$(ls -t serverless-web-app/build/distributions/lambda-layer-boneyard-*.zip | head -1)
 source_bundle=$(ls -t serverless-web-app/build/distributions/source-bundle-boneyard-*.zip | head -1)
 source_runtime_bundle=$(ls -t serverless-web-app/build/distributions/source-runtime-boneyard-*.zip | head -1)
@@ -36,7 +36,7 @@ fi
 # deploy the stack
 aws cloudformation $stack_op \
 --stack-name $stack_name \
---template-url 'https://ohboywerecamping.s3.amazonaws.com/web-app-dist/main.yml' \
+--template-url 'https://cberes-gardenmanager.s3.amazonaws.com/web-app-dist/main.yml' \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters '[
   {

@@ -6,7 +6,7 @@ export default {
 <template>
   <div>
     &copy; 2020 Corey Beres.
-    Source available on <a href="https://github.com/cberes/ohboywerecamping">GitHub</a>.
+    Source available on <a href="https://github.com/cberes/gardens">GitHub</a>.
   </div>
 </template>
 

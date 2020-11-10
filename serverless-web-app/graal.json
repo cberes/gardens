@@ -68,7 +68,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.webapp.Lambda$LambdaError",
+    "name": "gardenmanager.webapp.Lambda$LambdaError",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -79,7 +79,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.webapp.availability.ReadAvailabilityLambda$Response",
+    "name": "gardenmanager.webapp.availability.ReadAvailabilityLambda$Response",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -90,7 +90,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.webapp.order.CreateOrderLambda$Request",
+    "name": "gardenmanager.webapp.order.CreateOrderLambda$Request",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -101,7 +101,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.webapp.order.CreateOrderLambda$Response",
+    "name": "gardenmanager.webapp.order.CreateOrderLambda$Response",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -112,7 +112,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.domain.CampgroundAvailability",
+    "name": "gardenmanager.domain.CampgroundAvailability",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -123,7 +123,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.domain.CampsiteAvailability",
+    "name": "gardenmanager.domain.CampsiteAvailability",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,
@@ -134,7 +134,7 @@
     "allPublicFields": true
   },
   {
-    "name": "com.ohboywerecamping.domain.DateAvailability",
+    "name": "gardenmanager.domain.DateAvailability",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
     "allDeclaredMethods": true,

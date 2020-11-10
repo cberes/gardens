@@ -1,6 +1,6 @@
 import java.text.SimpleDateFormat
 
-group 'com.ohboywerecamping'
+group 'gardenmanager'
 version projectVersion
 
 apply plugin: 'java'

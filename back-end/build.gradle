@@ -1,4 +1,4 @@
-group 'com.ohboywerecamping'
+group 'gardenmanager'
 version projectVersion
 
 apply plugin: 'java'
