@@ -9,15 +9,13 @@ import java.util.Optional;
 
 import gardenmanager.domain.Gardener;
 import gardenmanager.gardener.GardenerRepository;
-import gardenmanager.webapp.util.AwsUtils;
 import gardenmanager.webapp.util.DynamoUtils;
+import gardenmanager.webapp.util.Tables;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
-import static gardenmanager.webapp.util.DynamoUtils.s;
-
 public class DynamoGardenerRepository implements GardenerRepository {
-    private final String tableName = "GARDENER_" + AwsUtils.environmentName();
+    private final String tableName = Tables.gardener();
     private final DynamoDbClient dynamo;
 
     public DynamoGardenerRepository(final DynamoDbClient dynamo) {

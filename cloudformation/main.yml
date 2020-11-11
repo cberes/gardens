@@ -155,7 +155,7 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "GARDENER_ID"
           AttributeType: "S"
-        - AttributeName: "SPECIES_ID"
+        - AttributeName: "ID"
           AttributeType: "S"
         - AttributeName: "NAME"
           AttributeType: "S"
@@ -168,7 +168,7 @@ Resources:
       KeySchema:
         - AttributeName: "GARDENER_ID"
           KeyType: "HASH"
-        - AttributeName: "SPECIES_ID"
+        - AttributeName: "ID"
           KeyType: "RANGE"
 
   PlantTable:
@@ -178,16 +178,18 @@ Resources:
       TableName: !Join ['_', ["PLANT", !Ref EnvironmentName]]
       BillingMode: 'PAY_PER_REQUEST'
       AttributeDefinitions:
-        - AttributeName: "GARDENER_SPECIES_ID"
+        - AttributeName: "GARDENER_ID"
+          AttributeType: "S"
+        - AttributeName: "ID"
           AttributeType: "S"
         - AttributeName: "GARDEN"
           AttributeType: "S"
         - AttributeName: "PLANTED"
           AttributeType: "S"
       KeySchema:
-        - AttributeName: "GARDENER_SPECIES_ID"
+        - AttributeName: "GARDENER_ID"
           KeyType: "HASH"
-        - AttributeName: "GARDEN"
+        - AttributeName: "ID"
           KeyType: "RANGE"
 
   CampgroundTable:

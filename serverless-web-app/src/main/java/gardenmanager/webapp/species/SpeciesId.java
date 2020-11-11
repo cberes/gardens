@@ -1,12 +1,14 @@
 package gardenmanager.webapp.species;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Objects;
 
-public class Id {
+public class SpeciesId {
     private final String gardenerId;
     private final String speciesId;
 
-    public Id(final String gardenerId, final String speciesId) {
+    public SpeciesId(final String gardenerId, final String speciesId) {
         this.gardenerId = gardenerId;
         this.speciesId = speciesId;
     }
@@ -27,7 +29,7 @@ public class Id {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final Id id = (Id) o;
+        final SpeciesId id = (SpeciesId) o;
         return gardenerId.equals(id.gardenerId) && speciesId.equals(id.speciesId);
     }
 
@@ -38,11 +40,19 @@ public class Id {
 
     @Override
     public String toString() {
-        return gardenerId + ':' + speciesId;
+        return encode(gardenerId) + ':' + speciesId;
     }
 
-    public static Id fromString(final String s) {
+    private static String encode(final String s) {
+        return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static SpeciesId fromString(final String s) {
         String[] parts = s.split(":", 2);
-        return new Id(parts[0], parts[1]);
+        return new SpeciesId(decode(parts[0]), parts[1]);
+    }
+
+    private static String decode(final String s) {
+        return new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8);
     }
 }
