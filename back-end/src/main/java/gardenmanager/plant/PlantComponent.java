@@ -1,14 +1,18 @@
 package gardenmanager.plant;
 
 import java.util.List;
+import java.util.Optional;
 
 import gardenmanager.domain.Garden;
 import gardenmanager.domain.Plant;
+import gardenmanager.domain.SpeciesWithPlants;
 
 public interface PlantComponent {
     List<Garden> findGardensByGardenerId(String gardenerId);
 
-    List<Plant> findPlantsBySpeciesId(String speciesId);
+    Optional<SpeciesWithPlants> findPlantsBySpeciesId(String speciesId);
+
+    List<SpeciesWithPlants> findPlantsByGardenerId(String gardenerId);
 
     String save(Plant plant);
 

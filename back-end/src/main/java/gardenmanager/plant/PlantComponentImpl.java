@@ -1,17 +1,26 @@
 package gardenmanager.plant;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import gardenmanager.domain.Garden;
 import gardenmanager.domain.Plant;
+import gardenmanager.domain.Species;
+import gardenmanager.domain.SpeciesWithPlants;
+import gardenmanager.species.SpeciesRepository;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 public class PlantComponentImpl implements PlantComponent {
     private final PlantRepository plants;
+    private final SpeciesRepository speciesRepo;
 
-    public PlantComponentImpl(final PlantRepository plants) {
+    public PlantComponentImpl(final PlantRepository plants, final SpeciesRepository speciesRepo) {
         this.plants = plants;
+        this.speciesRepo = speciesRepo;
     }
 
     @Override
@@ -30,8 +39,22 @@ public class PlantComponentImpl implements PlantComponent {
     }
 
     @Override
-    public List<Plant> findPlantsBySpeciesId(final String speciesId) {
-        return plants.findAllBySpeciesId(speciesId);
+    public List<SpeciesWithPlants> findPlantsByGardenerId(final String gardenerId) {
+        final List<Species> allSpecies = speciesRepo.findAllByGardenerId(gardenerId);
+
+        final Map<String, List<Plant>> plantsBySpeciesId = plants.findAllByGardenerId(gardenerId)
+                .stream().collect(groupingBy(Plant::getSpeciesId));
+
+        return allSpecies.stream()
+                .map(species -> new SpeciesWithPlants(species,
+                        plantsBySpeciesId.getOrDefault(species.getId(), emptyList())))
+                .collect(toList());
+    }
+
+    @Override
+    public Optional<SpeciesWithPlants> findPlantsBySpeciesId(final String speciesId) {
+        return speciesRepo.findById(speciesId).map(species ->
+                new SpeciesWithPlants(species, plants.findAllBySpeciesId(speciesId)));
     }
 
     @Override

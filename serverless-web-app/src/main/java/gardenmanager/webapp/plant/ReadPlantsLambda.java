@@ -1,6 +1,5 @@
 package gardenmanager.webapp.plant;
 
-import java.util.List;
 import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.Context;
@@ -8,11 +7,9 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import gardenmanager.domain.Gardener;
-import gardenmanager.domain.Plant;
-import gardenmanager.domain.Species;
+import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
-import gardenmanager.species.SpeciesComponent;
 import gardenmanager.webapp.util.Cognito;
 import gardenmanager.webapp.util.ErrorMessage;
 import gardenmanager.webapp.util.JsonUtils;
@@ -20,31 +17,22 @@ import gardenmanager.webapp.util.Responses;
 
 public class ReadPlantsLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     public static class Response {
-        private final Species species;
-        private List<Plant> plants;
+        private final SpeciesWithPlants result;
 
-        public Response(final Species species, final List<Plant> plants) {
-            this.species = species;
-            this.plants = plants;
+        public Response(final SpeciesWithPlants result) {
+            this.result = result;
         }
 
-        public Species getSpecies() {
-            return species;
-        }
-
-        public List<Plant> getPlants() {
-            return plants;
+        public SpeciesWithPlants getResult() {
+            return result;
         }
     }
 
-    private final SpeciesComponent species;
     private final PlantComponent plants;
     private final GardenerComponent gardeners;
 
-    public ReadPlantsLambda(final SpeciesComponent species,
-                            final PlantComponent plants,
+    public ReadPlantsLambda(final PlantComponent plants,
                             final GardenerComponent gardeners) {
-        this.species = species;
         this.plants = plants;
         this.gardeners = gardeners;
     }
@@ -62,13 +50,13 @@ public class ReadPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
                 .map(Gardener::getId)
                 .orElse("example");
 
-        final Optional<Species> found = species.findSpeciesById(speciesId).filter(plant -> plant.getGardenerId().equals(gardenerId));
+        final Optional<SpeciesWithPlants> found = plants.findPlantsBySpeciesId(speciesId)
+                .filter(it -> it.getSpecies().getGardenerId().equals(gardenerId));
 
         if (found.isEmpty()) {
             return Responses.notFound(JsonUtils.toJson(new ErrorMessage("Species not found: " + speciesId)));
         }
 
-        return Responses.ok(JsonUtils.toJson(new Response(
-                found.get(), plants.findPlantsBySpeciesId(speciesId))));
+        return Responses.ok(JsonUtils.toJson(new Response(found.get())));
     }
 }

@@ -59,7 +59,7 @@ final class Singletons {
 
     static PlantComponent plantComponent() {
         if (instance.plantComponent == null) {
-            instance.plantComponent = new PlantComponentImpl(plants());
+            instance.plantComponent = new PlantComponentImpl(plants(), species());
         }
         return instance.plantComponent;
     }

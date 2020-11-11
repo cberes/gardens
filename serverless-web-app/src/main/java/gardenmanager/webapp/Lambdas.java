@@ -35,13 +35,13 @@ public final class Lambdas {
 
     public static class LiveReadPlantsLambda extends ReadPlantsLambda {
         public LiveReadPlantsLambda() {
-            super(Singletons.speciesComponent(), Singletons.plantComponent(), Singletons.gardenerComponent());
+            super(Singletons.plantComponent(), Singletons.gardenerComponent());
         }
     }
 
     public static class LiveReadAllPlantsLambda extends ReadAllPlantsLambda {
         public LiveReadAllPlantsLambda() {
-            super(Singletons.speciesComponent(), Singletons.plantComponent(), Singletons.gardenerComponent());
+            super(Singletons.plantComponent(), Singletons.gardenerComponent());
         }
     }
 

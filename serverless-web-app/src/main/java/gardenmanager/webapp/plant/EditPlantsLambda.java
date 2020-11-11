@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gardenmanager.domain.Gardener;
 import gardenmanager.domain.Plant;
 import gardenmanager.domain.Species;
+import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
 import gardenmanager.species.SpeciesComponent;
@@ -53,20 +54,14 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
     }
 
     public static class Response {
-        private final Species species;
-        private List<Plant> plants;
+        private final SpeciesWithPlants result;
 
-        public Response(final Species species, final List<Plant> plants) {
-            this.species = species;
-            this.plants = plants;
+        public Response(final SpeciesWithPlants result) {
+            this.result = result;
         }
 
-        public Species getSpecies() {
-            return species;
-        }
-
-        public List<Plant> getPlants() {
-            return plants;
+        public SpeciesWithPlants getResult() {
+            return result;
         }
     }
 
@@ -105,7 +100,7 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
         request.getPlantsToDelete().forEach(plants::delete);
 
         return Responses.created(JsonUtils.toJson(new Response(
-                request.getSpecies(), request.getPlants())));
+                new SpeciesWithPlants(request.getSpecies(), request.getPlants()))));
     }
 
     private void setGardenerIds(final APIGatewayProxyRequestEvent input, final Request request) {
