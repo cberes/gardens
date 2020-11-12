@@ -15,7 +15,7 @@ export default router => {
 }
 
 function isAuthenticationRequired (to) {
-  return ['pending-reservation', 'orders', 'order'].includes(to.name)
+  return ['edit-species'].includes(to.name)
 }
 
 async function guardAuthenticate (router, next) {

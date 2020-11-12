@@ -8,5 +8,9 @@ export default {
   post (url, request, headers) {
     const options = headers && { headers }
     return axios.post(url, request, options)
+  },
+  delete (url, headers) {
+    const options = headers && { headers }
+    return axios.delete(url, options)
   }
 }

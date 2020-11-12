@@ -1,10 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import authRoutes from '@/auth/auth-routes'
-import campgroundRoutes from '@/campground/campground-routes'
-import campsiteRoutes from '@/campsite/campsite-routes'
-import orderRoutes from '@/order/order-routes'
-import reservationRoutes from '@/reservation/reservation-routes'
+import speciesRoutes from '@/species/species-routes'
 
 Vue.use(VueRouter)
 
@@ -13,10 +10,7 @@ const router = new VueRouter({
   base: process.env.BASE_URL,
   routes: [
     ...authRoutes,
-    ...campgroundRoutes,
-    ...campsiteRoutes,
-    ...orderRoutes,
-    ...reservationRoutes,
+    ...speciesRoutes,
     {
       path: '/404',
       name: '404',
