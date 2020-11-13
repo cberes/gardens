@@ -4,28 +4,23 @@ import apiConfig from '@/config/api'
 const baseUrl = apiConfig.url + '/api/species'
 
 export default {
-  getAllSpecies () {
+  getAllSpecies (authToken) {
     const url = baseUrl
-    return httpService.get(url)
+    return httpService.get(url, authToken && { Authorization: authToken })
   },
 
-  getSpecies (id) {
+  getSpecies (id, authToken) {
     const url = baseUrl + '/' + id
-    return httpService.get(url)
+    return httpService.get(url, authToken && { Authorization: authToken })
   },
 
-  updateSpeciesAndPlants (species, plants, plantsToDelete) {
+  updateSpeciesAndPlants (request, authToken) {
     const url = baseUrl
-    const request = {
-        species,
-        plants,
-        plantsToDelete
-    }
-    return httpService.post(url, request)
+    return httpService.post(url, request, { Authorization: authToken })
   },
 
-  deleteSpecies (id) {
+  deleteSpecies (id, authToken) {
     const url = baseUrl + '/' + id
-    return httpService.delete(url)
+    return httpService.delete(url, { Authorization: authToken })
   },
 }

@@ -4,8 +4,8 @@ import apiConfig from '@/config/api'
 const baseUrl = apiConfig.url + '/api/gardens'
 
 export default {
-  getGardens () {
+  getGardens (authToken) {
     const url = baseUrl
-    return httpService.get(url)
+    return httpService.get(url, authToken && { Authorization: authToken })
   }
 }

@@ -32,7 +32,7 @@ export default {
       })
   },
   methods: {
-    ...mapActions('plants', ['fetchSpecies']),
+    ...mapActions('plants', ['deleteSpecies', 'fetchSpecies']),
     editSpecies() {
       this.$router.push({ name: 'edit-species', params: { id: this.speciesId } })
     },
@@ -42,11 +42,11 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
-        speciesService.deleteSpecies(this.speciesId)
+        this.deleteSpecies(this.speciesId)
           .then(() => {
             this.$message({
               type: 'success',
-              message: 'Delete succeeded'
+              message: 'Plant deleted successfully'
             })
   
             this.$router.push({ name: 'species-list' })
