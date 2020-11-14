@@ -14,10 +14,20 @@ export default {
   },
   data () {
     return {
-      plants: this.value,
+      plants: this.value.map(plant => {
+        return {
+          ...plant,
+          key: plant.id
+        }
+      }),
       gardens: null,
       newGarden: '',
-      hintVisible: false
+      resultsFound: 0
+    }
+  },
+  calculated: {
+    hintVisible () {
+      return this.newGarden.length > 0 && this.resultsFound === 0
     }
   },
   mounted () {
@@ -36,36 +46,34 @@ export default {
       const queryStringLower = queryString.toLowerCase()
       const results = this.gardens
         .filter(it => it.toLowerCase().indexOf(queryStringLower) === 0)
-      this.hintVisible = results.length === 0
+      this.resultsFound = results.length
       cb(results)
     },
-    handleSelect(item) {
-      // TODO figure this out
-      console.log(item);
+    handleSelect({ value: garden }) {
       this.plants.push({
-        // TODO need to set a key
-        garden: item
+        key: Date.now().toString(),
+        garden
       })
 
       this.$emit('input', this.plants)
-
-      this.newGarden = ''
-      this.hintVisible = false
+      this.clearGarden()
     },
-    deletePlant(x, y, z) {
-      // TODO figure this out
-      console.log(x)
-      console.log(y)
-      console.log(z)
+    clearGarden() {
+      this.newGarden = ''
+    },
+    deletePlant(event) {
+      const elem = event.target.parentElement
+      const plantKey = elem && elem.dataset['plantKey']
+      const index = this.plants.findIndex(it => it.key === plantKey)
+      const plant = index !== -1 ? this.plants[index] : null
 
-      if (x.id) {
-        this.$emit('delete', x)
-      }
-
-      const index = this.plants.findIndex(it => it.id === x.id)
       if (index !== -1) {
         this.plants.splice(index, 1)
         this.$emit('input', this.plants)
+      }
+
+      if (plant && plant.id) {
+        this.$emit('delete', plant.id)
       }
     }
   }
@@ -83,9 +91,11 @@ export default {
         v-model="hintVisible">
         <el-autocomplete
           v-model="newGarden"
+          placeholder="Please input"
           v-on:keyup.enter="enterPressed"
           :fetch-suggestions="querySearch"
-          placeholder="Please input"
+          :trigger-on-focus="false"
+          :select-when-unmatched="true"
           @select="handleSelect"
         ></el-autocomplete>
       </el-popover>
@@ -93,9 +103,12 @@ export default {
     <el-row>
       <el-tag
         v-for="plant in plants"
-        :key="plant.id"
+        :key="plant.key"
+        :data-plant-key="plant.key"
         closable
-        @close="deletePlant">
+        @close="deletePlant"
+        type="success"
+        effect="plain">
         {{ plant.garden }}
       </el-tag>
     </el-row>
