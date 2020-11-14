@@ -73,7 +73,7 @@ task nativeImage(type: Exec) {
     workingDir projectDir
 
     commandLine './build-with-docker', projectDir.absolutePath, nativeImageClasspath(),
-            'com.ohboywerecamping.webapp.Main', 'bootstrap'
+            'gardenmanager.webapp.Main', 'bootstrap'
 }
 
 task zipImage(type: Zip) {

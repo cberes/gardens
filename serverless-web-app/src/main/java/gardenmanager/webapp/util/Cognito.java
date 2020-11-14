@@ -5,6 +5,9 @@ import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 
+/**
+ * Amazon Cognito utility class.
+ */
 public class Cognito {
     private Cognito() {
         throw new UnsupportedOperationException("cannot instantiate " + getClass());

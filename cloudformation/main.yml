@@ -40,12 +40,6 @@ Parameters:
       The file name of the bundle for the lambda functions; this is a .zip file produced by
       the build. This template assumes it's been staged in s3://[StagingBucketName]/web-app-dist
 
-  SourceRuntimeBundleName:
-    Type: String
-    Description: >-
-      The file name of the bundle of a GraalVM runtime and lambda functions. This is a .zip file
-      produced by the build. This template assumes it's been staged in s3://[StagingBucketName]/web-app-dist
-
 Conditions:
 
   InLiveEnv: !Equals [!Ref EnvironmentName, live]

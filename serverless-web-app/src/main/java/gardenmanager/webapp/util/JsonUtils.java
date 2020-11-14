@@ -7,6 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+/**
+ * JSON utility class.
+ * Holds an instance to a Jackson {@link ObjectMapper} that is used
+ * to serialize and deserialize POJOs to/from JSON.
+ */
 public final class JsonUtils {
     private static final ObjectMapper jackson;
 

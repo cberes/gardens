@@ -22,6 +22,10 @@ import software.amazon.awssdk.utils.IoUtils;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 
+/**
+ * Lambda utility class.
+ * Receives Lambda events via HTTP and converts them to event POJOs.
+ */
 public final class Lambda {
     public static class LambdaError {
         public final String errorMessage;

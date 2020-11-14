@@ -6,10 +6,17 @@ import java.util.function.Supplier;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import gardenmanager.webapp.Lambdas.*;
+import gardenmanager.webapp.util.AwsUtils;
 
+/**
+ * The main entry point for Lambda functions compiled using Graal.
+ * This class uses the name of the handler from the {@code _HANDLER} environment variable
+ * to pick the Lambda function to run.
+ */
 public final class Main {
     public static void main(String[] args) throws Exception {
-        run(System.getenv("_HANDLER"));
+        run(AwsUtils.handler());
     }
 
     static void run(final String handlerName) throws Exception {
@@ -23,11 +30,11 @@ public final class Main {
 
     private static Map<String, Supplier<RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>>> handlers() {
         return Map.of(
-                "read_garden_list", Lambdas.LiveReadGardenListLambda::new,
-                "create_gardener", Lambdas.LiveCreateGardenerLambda::new,
-                "delete_species", Lambdas.LiveDeleteSpeciesLambda::new,
-                "edit_plants", Lambdas.LiveEditPlantsLambda::new,
-                "read_plants", Lambdas.LiveReadPlantsLambda::new,
-                "read_all_plants", Lambdas.LiveReadAllPlantsLambda::new);
+                "read_garden_list", LiveReadGardenListLambda::new,
+                "create_gardener", LiveCreateGardenerLambda::new,
+                "delete_species", LiveDeleteSpeciesLambda::new,
+                "edit_plants", LiveEditPlantsLambda::new,
+                "read_plants", LiveReadPlantsLambda::new,
+                "read_all_plants", LiveReadAllPlantsLambda::new);
     }
 }

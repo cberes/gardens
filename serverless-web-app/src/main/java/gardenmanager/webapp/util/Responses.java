@@ -4,6 +4,9 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 
 import static java.util.Collections.singletonMap;
 
+/**
+ * Common HTTP responses.
+ */
 public final class Responses {
     private Responses() {
         throw new UnsupportedOperationException("cannot instantiate " + getClass());

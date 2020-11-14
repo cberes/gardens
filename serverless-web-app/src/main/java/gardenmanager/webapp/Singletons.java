@@ -15,6 +15,9 @@ import gardenmanager.webapp.species.DynamoSpeciesRepository;
 import gardenmanager.webapp.util.AwsUtils;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
+/**
+ * Instances of all Lambda function dependencies.
+ */
 final class Singletons {
     private static final Singletons instance = new Singletons();
 

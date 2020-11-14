@@ -11,6 +11,9 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Dynamo utility class.
+ */
 public final class DynamoUtils {
     private DynamoUtils() {
         throw new UnsupportedOperationException("cannot instantiate " + getClass());

@@ -2,6 +2,9 @@ package gardenmanager.webapp;
 
 import com.amazonaws.services.lambda.runtime.*;
 
+/**
+ * {@link Context} implementation for use by Lambda functions compiled by Graal.
+ */
 class DefaultContext implements Context {
     private final String requestId;
     private final String functionArn;

@@ -8,6 +8,9 @@ import gardenmanager.webapp.plant.ReadPlantsLambda;
 import gardenmanager.webapp.plant.ReadAllPlantsLambda;
 import gardenmanager.webapp.util.JsonUtils;
 
+/**
+ * Instances of all Lambda functions.
+ */
 public final class Lambdas {
     public static class LiveReadGardenListLambda extends ReadGardenListLambda {
         public LiveReadGardenListLambda() {

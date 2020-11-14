@@ -1,5 +1,8 @@
 package gardenmanager.webapp.util;
 
+/**
+ * Dynamo table names.
+ */
 public class Tables {
     private static final Tables instance = new Tables();
 
