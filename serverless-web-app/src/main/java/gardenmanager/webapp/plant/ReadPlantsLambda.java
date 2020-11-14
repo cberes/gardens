@@ -48,7 +48,7 @@ public class ReadPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
         final String gardenerId = Cognito.username(input)
                 .flatMap(gardeners::findGardenerByEmail)
                 .map(Gardener::getId)
-                .orElse("example");
+                .orElse("public");
 
         final Optional<SpeciesWithPlants> found = plants.findPlantsBySpeciesId(speciesId)
                 .filter(it -> it.getSpecies().getGardenerId().equals(gardenerId));

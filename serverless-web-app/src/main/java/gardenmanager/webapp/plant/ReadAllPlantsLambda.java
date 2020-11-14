@@ -46,7 +46,7 @@ public class ReadAllPlantsLambda implements RequestHandler<APIGatewayProxyReques
         final String gardenerId = Cognito.username(input)
                 .flatMap(gardeners::findGardenerByEmail)
                 .map(Gardener::getId)
-                .orElse("example");
+                .orElse("public");
 
         return ok(JsonUtils.toJson(new Response(plants.findPlantsByGardenerId(gardenerId))));
     }

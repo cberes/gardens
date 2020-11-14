@@ -65,13 +65,13 @@ Resources:
         S3Bucket: !Ref StagingBucketName
         S3Key: !Join ['/', ['web-app-dist', !Ref LambdaLayerBundleName]]
 
+# region Roles
   WebAppLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Join ['_', [!Join ['_', !Split ['-', !Ref AppPrefix]], 'lambda_role', !Ref EnvironmentName]]
       MaxSessionDuration: 43200 # 12 Hours
       Path: !Sub '/${AppPrefix}/'
-
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -107,18 +107,12 @@ Resources:
                   - dynamodb:Scan
                   - dynamodb:UpdateItem
                 Resource:
-                  - !GetAtt CampgroundTable.Arn
-                  - !Join ['/', [!GetAtt CampgroundTable.Arn, 'index/*']]
-                  - !GetAtt AreaTable.Arn
-                  - !Join ['/', [!GetAtt AreaTable.Arn, 'index/*']]
-                  - !GetAtt CampsiteTable.Arn
-                  - !Join ['/', [!GetAtt CampsiteTable.Arn, 'index/*']]
-                  - !GetAtt CustomerTable.Arn
-                  - !Join ['/', [!GetAtt CustomerTable.Arn, 'index/*']]
-                  - !GetAtt OrderTable.Arn
-                  - !Join ['/', [!GetAtt OrderTable.Arn, 'index/*']]
-                  - !GetAtt ReservationTable.Arn
-                  - !Join ['/', [!GetAtt ReservationTable.Arn, 'index/*']]
+                  - !GetAtt GardenerTable.Arn
+                  - !Join ['/', [!GetAtt GardenerTable.Arn, 'index/*']]
+                  - !GetAtt SpeciesTable.Arn
+                  - !Join ['/', [!GetAtt SpeciesTable.Arn, 'index/*']]
+                  - !GetAtt PlantTable.Arn
+                  - !Join ['/', [!GetAtt PlantTable.Arn, 'index/*']]
               - Effect: Allow
                 Action:
                   - lambda:InvokeFunction
@@ -129,7 +123,9 @@ Resources:
                   - lambda:GetLayerVersion
                 Resource:
                   - !Ref RuntimeClassPathLambdaLayer
+# endregion Roles
 
+# region Dynamo
   GardenerTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -191,161 +187,9 @@ Resources:
           KeyType: "HASH"
         - AttributeName: "ID"
           KeyType: "RANGE"
+# endregion Dynamo
 
-  CampgroundTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Join ['_', ["CAMPGROUND", !Ref EnvironmentName]]
-      BillingMode: 'PAY_PER_REQUEST'
-      AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "HOSTNAME"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "ID"
-          KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "CAMPGROUNDS_BY_HOSTNAME"
-          KeySchema:
-            - AttributeName: "HOSTNAME"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-
-  AreaTable:
-    Type: AWS::DynamoDB::Table
-    DependsOn: "CampgroundTable"
-    Properties:
-      TableName: !Join ['_', ["AREA", !Ref EnvironmentName]]
-      BillingMode: 'PAY_PER_REQUEST'
-      AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "CAMPGROUND_ID"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "ID"
-          KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "AREAS_BY_CAMPGROUND_ID"
-          KeySchema:
-            - AttributeName: "CAMPGROUND_ID"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-
-  CampsiteTable:
-    Type: AWS::DynamoDB::Table
-    DependsOn: "AreaTable"
-    Properties:
-      TableName: !Join ['_', ["CAMPSITE", !Ref EnvironmentName]]
-      BillingMode: 'PAY_PER_REQUEST'
-      AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "CAMPGROUND_ID"
-          AttributeType: "S"
-        - AttributeName: "AREA_ID"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "ID"
-          KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "CAMPSITES_BY_CAMPGROUND_ID"
-          KeySchema:
-            - AttributeName: "CAMPGROUND_ID"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-        - IndexName: "CAMPSITES_BY_AREA_ID"
-          KeySchema:
-            - AttributeName: "AREA_ID"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-
-  CustomerTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Join ['_', ["CUSTOMER", !Ref EnvironmentName]]
-      BillingMode: 'PAY_PER_REQUEST'
-      AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "EMAIL"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "ID"
-          KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "CUSTOMERS_BY_EMAIL"
-          KeySchema:
-            - AttributeName: "EMAIL"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-
-  OrderTable:
-    Type: AWS::DynamoDB::Table
-    DependsOn: "CustomerTable"
-    Properties:
-      TableName: !Join ['_', ["ORDER", !Ref EnvironmentName]]
-      BillingMode: 'PAY_PER_REQUEST'
-      AttributeDefinitions:
-        - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "CUSTOMER_ID"
-          AttributeType: "S"
-        - AttributeName: "CREATED"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "ID"
-          KeyType: "HASH"
-      GlobalSecondaryIndexes:
-        - IndexName: "ORDERS_BY_CUSTOMER_AND_DATE"
-          KeySchema:
-            - AttributeName: "CUSTOMER_ID"
-              KeyType: "HASH"
-            - AttributeName: "CREATED"
-              KeyType: "RANGE"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-      TimeToLiveSpecification:
-        AttributeName: "EXPIRE_ON"
-        Enabled: !If [InTestEnv, true, false]
-
-  ReservationTable:
-    Type: AWS::DynamoDB::Table
-    DependsOn:
-      - "CampsiteTable"
-      - "OrderTable"
-    Properties:
-      TableName: !Join ['_', ["RESERVATION", !Ref EnvironmentName]]
-      BillingMode: 'PAY_PER_REQUEST'
-      AttributeDefinitions:
-        - AttributeName: "CAMPSITE_ID"
-          AttributeType: "S"
-        - AttributeName: "RESERVATION_DATE"
-          AttributeType: "S"
-        - AttributeName: "ORDER_ID"
-          AttributeType: "S"
-      KeySchema:
-        - AttributeName: "CAMPSITE_ID"
-          KeyType: "HASH"
-        - AttributeName: "RESERVATION_DATE"
-          KeyType: "RANGE"
-      GlobalSecondaryIndexes:
-        - IndexName: "RESERVATIONS_BY_ORDER_ID"
-          KeySchema:
-            - AttributeName: "ORDER_ID"
-              KeyType: "HASH"
-          Projection:
-            ProjectionType: "KEYS_ONLY"
-      TimeToLiveSpecification:
-        AttributeName: "EXPIRE_ON"
-        Enabled: !If [InTestEnv, true, false]
-
+# region Cognito
   WebAppUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -358,7 +202,7 @@ Resources:
         - 'email'
       EmailConfiguration:
         EmailSendingAccount: 'COGNITO_DEFAULT'
-      EmailVerificationSubject: !Sub '${BusinessName} verification link'
+      EmailVerificationSubject: !Sub '${BusinessName} email verification'
       EmailVerificationMessage: !Sub >-
         Thank you for creating your ${BusinessName} account!
 
@@ -397,17 +241,18 @@ Resources:
       RefreshTokenValidity: 30
       SupportedIdentityProviders:
         - 'COGNITO'
+# endregion Cognito
 
-  # Lambda Function that reads availability for a campsite
-  ReadAvailabilityLambda:
+# region Lambda
+  ReadAllPlantsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ['-', [!Ref AppPrefix, 'read-availability', !Ref EnvironmentName]]
-      Description: Reads a campsite's availability after receiving HTTP GET from front end
+      FunctionName: !Join ['-', [!Ref AppPrefix, 'read-all-plants', !Ref EnvironmentName]]
+      Description: Reads all of a user's plant species and plants after receiving HTTP GET from front end
       Code:
         S3Bucket: !Ref StagingBucketName
         S3Key: !Join ['/', ['web-app-dist', !Ref SourceRuntimeBundleName]]
-      Handler: read_availability
+      Handler: gardenmanager.webapp.Lambdas$LiveReadAllPlantsLambda::handleRequest
       Layers:
         - !Ref RuntimeClassPathLambdaLayer
       Environment:
@@ -420,16 +265,15 @@ Resources:
       TracingConfig:
         Mode: Active
 
-  # Lambda Function that reads a list of orders made by a customer
-  ReadOrderListLambda:
+  ReadPlantsLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Join ['-', [!Ref AppPrefix, 'read-order-list', !Ref EnvironmentName]]
-      Description: Reads the list of orders for a customer after receiving HTTP GET from front end
+      Description: Reads one of a user's plant species and plants after receiving HTTP GET from front end
       Code:
         S3Bucket: !Ref StagingBucketName
         S3Key: !Join ['/', ['web-app-dist', !Ref LambdaBundleName]]
-      Handler: gardenmanager.webapp.Lambdas$LiveReadOrderListLambda::handleRequest
+      Handler: gardenmanager.webapp.Lambdas$LiveReadPlantsLambda::handleRequest
       Layers:
         - !Ref RuntimeClassPathLambdaLayer
       Environment:
@@ -442,16 +286,15 @@ Resources:
       TracingConfig:
         Mode: Active
 
-  # Lambda Function that reads a reservation for a campsite
-  ReadOrderLambda:
+  ReadGardenListLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Join ['-', [!Ref AppPrefix, 'read-order', !Ref EnvironmentName]]
-      Description: Reads a reservation after receiving HTTP GET from front end
+      Description: Reads all of a user's gardens after receiving HTTP GET from front end
       Code:
         S3Bucket: !Ref StagingBucketName
         S3Key: !Join ['/', ['web-app-dist', !Ref LambdaBundleName]]
-      Handler: gardenmanager.webapp.Lambdas$LiveReadOrderLambda::handleRequest
+      Handler: gardenmanager.webapp.Lambdas$LiveReadGardenListLambda::handleRequest
       Layers:
         - !Ref RuntimeClassPathLambdaLayer
       Environment:
@@ -464,16 +307,15 @@ Resources:
       TracingConfig:
         Mode: Active
 
-  # Lambda Function that creates reservations for campsites
-  CreateOrderLambda:
+  EditPlantsLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Join ['-', [!Ref AppPrefix, 'create-order', !Ref EnvironmentName]]
-      Description: Creates reservation after receiving HTTP POST from front end
+      Description: Creates or updates a user's plant species and plants after receiving HTTP POST from front end
       Code:
         S3Bucket: !Ref StagingBucketName
         S3Key: !Join ['/', ['web-app-dist', !Ref LambdaBundleName]]
-      Handler: gardenmanager.webapp.Lambdas$LiveCreateOrderLambda::handleRequest
+      Handler: gardenmanager.webapp.Lambdas$LiveEditPlantsLambda::handleRequest
       Layers:
         - !Ref RuntimeClassPathLambdaLayer
       Environment:
@@ -486,39 +328,70 @@ Resources:
       TracingConfig:
         Mode: Active
 
-  ReadAvailabilityLambdaAPIGatewayPermission:
+  DeleteSpeciesLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join ['-', [!Ref AppPrefix, 'create-order', !Ref EnvironmentName]]
+      Description: Deletes a user's plant species and all associated plants after receiving HTTP POST from front end
+      Code:
+        S3Bucket: !Ref StagingBucketName
+        S3Key: !Join ['/', ['web-app-dist', !Ref LambdaBundleName]]
+      Handler: gardenmanager.webapp.Lambdas$LiveEditPlantsLambda::handleRequest
+      Layers:
+        - !Ref RuntimeClassPathLambdaLayer
+      Environment:
+        Variables:
+          APP_ENV_NAME: !Ref EnvironmentName
+      MemorySize: 256 # megabytes
+      Role: !GetAtt WebAppLambdaRole.Arn
+      Runtime: java11
+      Timeout: 120
+      TracingConfig:
+        Mode: Active
+
+  ReadAllPlantsLambdaAPIGatewayPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt ReadAvailabilityLambda.Arn
+      FunctionName: !GetAtt ReadAllPlantsLambda.Arn
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CampingRestAPI}/*/*/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${GardenManagerRestAPI}/*/*/*'
 
-  ReadOrderListLambdaAPIGatewayPermission:
+  ReadPlantsLambdaAPIGatewayPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt ReadOrderListLambda.Arn
+      FunctionName: !GetAtt ReadPlantsLambda.Arn
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CampingRestAPI}/*/*/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${GardenManagerRestAPI}/*/*/*'
 
-  ReadOrderLambdaAPIGatewayPermission:
+  ReadGardenListLambdaAPIGatewayPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt ReadOrderLambda.Arn
+      FunctionName: !GetAtt ReadGardenListLambda.Arn
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CampingRestAPI}/*/*/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${GardenManagerRestAPI}/*/*/*'
 
-  CreateOrderLambdaAPIGatewayPermission:
+  EditPlantsLambdaAPIGatewayPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !GetAtt CreateOrderLambda.Arn
+      FunctionName: !GetAtt EditPlantsLambda.Arn
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${CampingRestAPI}/*/*/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${GardenManagerRestAPI}/*/*/*'
 
-  CampingRestAPI:
+  DeleteSpeciesLambdaAPIGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt DeleteSpeciesLambda.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${GardenManagerRestAPI}/*/*/*'
+# endregion Lambda
+
+# region API Resources
+  GardenManagerRestAPI:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: !Join ['-', [!Ref AppPrefix, 'api', !Ref EnvironmentName]]
@@ -529,17 +402,17 @@ Resources:
           - EDGE
       FailOnWarnings: true
       # See https://webmasters.stackexchange.com/questions/31750/
-      # The reasons 860 bytes is the minimum size for compression is twofold:
+      # The reason 860 bytes is the minimum size for compression is twofold:
       # 1. The overhead of compressing an object under 860 bytes outweighs performance gain.
       # 2. Objects under 860 bytes can be transmitted via a single packet anyway,
       #    so there isn't a compelling reason to compress them.
       MinimumCompressionSize: 860
 
-  CampingRestAPIAuthorizer:
+  GardenManagerRestAPIAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties: 
-      Name: CampingRestAPIAuthorizer
-      RestApiId: !Ref CampingRestAPI
+      Name: GardenManagerRestAPIAuthorizer
+      RestApiId: !Ref GardenManagerRestAPI
       Type: COGNITO_USER_POOLS
       ProviderARNs: 
         - !GetAtt WebAppUserPool.Arn
@@ -547,105 +420,65 @@ Resources:
       AuthorizerResultTtlInSeconds: 300
       IdentitySource: method.request.header.Authorization
 
-  CampingRestAPIResource:
+  GardenManagerRestAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !GetAtt CampingRestAPI.RootResourceId
+      ParentId: !GetAtt GardenManagerRestAPI.RootResourceId
       PathPart: api
-      RestApiId: !Ref CampingRestAPI
+      RestApiId: !Ref GardenManagerRestAPI
 
-  AvailabilityAPIResource:
+  GardensAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref CampingRestAPIResource
-      PathPart: availability
-      RestApiId: !Ref CampingRestAPI
+      ParentId: !Ref GardenManagerRestAPIResource
+      PathPart: gardens
+      RestApiId: !Ref GardenManagerRestAPI
 
-  AvailabilityCampgroundAPIResource:
+  SpeciesAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref AvailabilityAPIResource
-      PathPart: campground
-      RestApiId: !Ref CampingRestAPI
+      ParentId: !Ref GardenManagerRestAPIResource
+      PathPart: species
+      RestApiId: !Ref GardenManagerRestAPI
 
-  AvailabilityCampgroundIdAPIResource:
+  SpeciesIdAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref AvailabilityCampgroundAPIResource
-      PathPart: '{campgroundId}'
-      RestApiId: !Ref CampingRestAPI
+      ParentId: !Ref SpeciesAPIResource
+      PathPart: '{speciesId}'
+      RestApiId: !Ref GardenManagerRestAPI
 
-  AvailabilityAreaAPIResource:
+  PublicAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref AvailabilityAPIResource
-      PathPart: area
-      RestApiId: !Ref CampingRestAPI
+      ParentId: !Ref GardenManagerRestAPIResource
+      PathPart: public
+      RestApiId: !Ref GardenManagerRestAPI
 
-  AvailabilityAreaIdAPIResource:
+  PublicSpeciesAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref AvailabilityAreaAPIResource
-      PathPart: '{areaId}'
-      RestApiId: !Ref CampingRestAPI
+      ParentId: !Ref PublicAPIResource
+      PathPart: species
+      RestApiId: !Ref GardenManagerRestAPI
 
-  AvailabilityCampsiteAPIResource:
+  PublicSpeciesIdAPIResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      ParentId: !Ref AvailabilityAPIResource
-      PathPart: campsite
-      RestApiId: !Ref CampingRestAPI
+      ParentId: !Ref PublicSpeciesAPIResource
+      PathPart: '{speciesId}'
+      RestApiId: !Ref GardenManagerRestAPI
+# endregion API Resources
 
-  AvailabilityCampsiteIdAPIResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref AvailabilityCampsiteAPIResource
-      PathPart: '{campsiteId}'
-      RestApiId: !Ref CampingRestAPI
-
-  CampsiteAPIResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref CampingRestAPIResource
-      PathPart: campsites
-      RestApiId: !Ref CampingRestAPI
-
-  CampsiteIdAPIResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref CampsiteAPIResource
-      PathPart: '{campsiteId}'
-      RestApiId: !Ref CampingRestAPI
-
-  CampsiteReservationAPIResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref CampsiteIdAPIResource
-      PathPart: reservations
-      RestApiId: !Ref CampingRestAPI
-
-  OrderAPIResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref CampingRestAPIResource
-      PathPart: orders
-      RestApiId: !Ref CampingRestAPI
-
-  OrderIdAPIResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      ParentId: !Ref OrderAPIResource
-      PathPart: '{orderId}'
-      RestApiId: !Ref CampingRestAPI
-
-  ReadCampgroundAvailabilityCORS:
+# region CORS
+  ApiSpeciesCORS:
     Type: AWS::ApiGateway::Method
     Properties:
-      OperationName: CORS for Read Campground Availability Event
+      OperationName: CORS for /api/species
       HttpMethod: OPTIONS
       AuthorizationType: NONE
-      ResourceId: !Ref AvailabilityCampgroundIdAPIResource
-      RestApiId: !Ref CampingRestAPI
+      ResourceId: !Ref SpeciesAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
       Integration:
         IntegrationResponses:
           - StatusCode: 200
@@ -668,14 +501,44 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
 
-  ReadAreaAvailabilityCORS:
+  ApiSpeciesIdCORS:
     Type: AWS::ApiGateway::Method
     Properties:
-      OperationName: CORS for Read Area Availability Event
+      OperationName: CORS for /api/species/{speciesId}
       HttpMethod: OPTIONS
       AuthorizationType: NONE
-      ResourceId: !Ref AvailabilityAreaIdAPIResource
-      RestApiId: !Ref CampingRestAPI
+      ResourceId: !Ref SpeciesIdAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
+      Integration:
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: !If [InLiveEnv, !Sub "'https://${DomainName}'", "'*'"]
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
+  ApiPublicSpeciesCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: CORS for /api/public/species
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      ResourceId: !Ref PublicSpeciesAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
       Integration:
         IntegrationResponses:
           - StatusCode: 200
@@ -698,14 +561,14 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
 
-  ReadCampsiteAvailabilityCORS:
+  ApiPublicSpeciesIdCORS:
     Type: AWS::ApiGateway::Method
     Properties:
-      OperationName: CORS for Read Campsite Availability Event
+      OperationName: CORS for /api/public/species/{speciesId}
       HttpMethod: OPTIONS
       AuthorizationType: NONE
-      ResourceId: !Ref AvailabilityCampsiteIdAPIResource
-      RestApiId: !Ref CampingRestAPI
+      ResourceId: !Ref PublicSpeciesIdAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
       Integration:
         IntegrationResponses:
           - StatusCode: 200
@@ -728,14 +591,14 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
 
-  ReadOrderListCORS:
+  ApiGardensCORS:
     Type: AWS::ApiGateway::Method
     Properties:
-      OperationName: CORS for Read Order List Event
+      OperationName: CORS for /api/gardens
       HttpMethod: OPTIONS
       AuthorizationType: NONE
-      ResourceId: !Ref OrderAPIResource
-      RestApiId: !Ref CampingRestAPI
+      ResourceId: !Ref GardensAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
       Integration:
         IntegrationResponses:
           - StatusCode: 200
@@ -757,191 +620,152 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
+# endregion CORS
 
-  ReadOrderCORS:
+# region API Methods
+  ReadAllPlantsAPIMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      OperationName: CORS for Read Reservation Event
-      HttpMethod: OPTIONS
-      AuthorizationType: NONE
-      ResourceId: !Ref OrderIdAPIResource
-      RestApiId: !Ref CampingRestAPI
-      Integration:
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              method.response.header.Access-Control-Allow-Origin: !If [InLiveEnv, !Sub "'https://${DomainName}'", "'*'"]
-            ResponseTemplates:
-              application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: 'Empty'
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
-
-  CreateOrderCORS:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      OperationName: CORS for Create Reservation Event
-      HttpMethod: OPTIONS
-      AuthorizationType: NONE
-      ResourceId: !Ref CampsiteReservationAPIResource
-      RestApiId: !Ref CampingRestAPI
-      Integration:
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
-              method.response.header.Access-Control-Allow-Origin: !If [InLiveEnv, !Sub "'https://${DomainName}'", "'*'"]
-            ResponseTemplates:
-              application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: 'Empty'
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
-
-  ReadCampgroundAvailabilityAPIMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      OperationName: Read Availability Event
-      HttpMethod: 'GET'
-      AuthorizationType: 'NONE'
-      ResourceId: !Ref AvailabilityCampgroundIdAPIResource
-      RestApiId: !Ref CampingRestAPI
-      RequestParameters:
-        'method.request.path.campsiteid': true
-      Integration:
-        IntegrationHttpMethod: 'POST'
-        Type: 'AWS_PROXY'
-        Uri: !Sub
-          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
-          - { Lambda: !GetAtt ReadAvailabilityLambda.Arn }
-
-  ReadAreaAvailabilityAPIMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      OperationName: Read Availability Event
-      HttpMethod: 'GET'
-      AuthorizationType: 'NONE'
-      ResourceId: !Ref AvailabilityAreaIdAPIResource
-      RestApiId: !Ref CampingRestAPI
-      RequestParameters:
-        'method.request.path.campsiteid': true
-      Integration:
-        IntegrationHttpMethod: 'POST'
-        Type: 'AWS_PROXY'
-        Uri: !Sub
-          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
-          - { Lambda: !GetAtt ReadAvailabilityLambda.Arn }
-
-  ReadCampsiteAvailabilityAPIMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      OperationName: Read Availability Event
-      HttpMethod: 'GET'
-      AuthorizationType: 'NONE'
-      ResourceId: !Ref AvailabilityCampsiteIdAPIResource
-      RestApiId: !Ref CampingRestAPI
-      RequestParameters:
-        'method.request.path.campsiteid': true
-      Integration:
-        IntegrationHttpMethod: 'POST'
-        Type: 'AWS_PROXY'
-        Uri: !Sub
-          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
-          - { Lambda: !GetAtt ReadAvailabilityLambda.Arn }
-
-  ReadOrderListAPIMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      OperationName: Read Order List Event
+      OperationName: Read All Plants Event
       HttpMethod: 'GET'
       AuthorizationType: 'COGNITO_USER_POOLS'
-      AuthorizerId: !Ref CampingRestAPIAuthorizer
-      ResourceId: !Ref OrderAPIResource
-      RestApiId: !Ref CampingRestAPI
+      AuthorizerId: !Ref GardenManagerRestAPIAuthorizer
+      ResourceId: !Ref SpeciesAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
       RequestParameters:
         'method.request.header.Authorization': true
-        'method.request.path.orderId': true
       Integration:
         IntegrationHttpMethod: 'POST'
         Type: 'AWS_PROXY'
         Uri: !Sub
           - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
-          - { Lambda: !GetAtt ReadOrderListLambda.Arn }
+          - { Lambda: !GetAtt ReadAllPlantsLambda.Arn }
 
-  ReadOrderAPIMethod:
+  ReadPlantsAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Read Plants Event
+      HttpMethod: 'GET'
+      AuthorizationType: 'COGNITO_USER_POOLS'
+      AuthorizerId: !Ref GardenManagerRestAPIAuthorizer
+      ResourceId: !Ref SpeciesIdAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
+      RequestParameters:
+        'method.request.header.Authorization': true
+        'method.request.path.speciesId': true
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
+          - { Lambda: !GetAtt ReadPlantsLambda.Arn }
+
+  ReadAllPublicPlantsAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Read All Plants Event
+      HttpMethod: 'GET'
+      AuthorizationType: 'NONE'
+      ResourceId: !Ref PublicSpeciesAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
+          - { Lambda: !GetAtt ReadAllPlantsLambda.Arn }
+
+  ReadPublicPlantsAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Read Plants Event
+      HttpMethod: 'GET'
+      AuthorizationType: 'NONE'
+      ResourceId: !Ref PublicSpeciesIdAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
+      RequestParameters:
+        'method.request.path.speciesId': true
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
+          - { Lambda: !GetAtt ReadPlantsLambda.Arn }
+
+  ReadGardenListAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Read Garden List Event
+      HttpMethod: 'GET'
+      AuthorizationType: 'COGNITO_USER_POOLS'
+      AuthorizerId: !Ref GardenManagerRestAPIAuthorizer
+      ResourceId: !Ref GardensAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
+      RequestParameters:
+        'method.request.header.Authorization': true
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
+          - { Lambda: !GetAtt ReadGardenListLambda.Arn }
+
+  EditPlantsAPIMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Create/Update Plants Event
+      HttpMethod: 'POST'
+      AuthorizationType: 'COGNITO_USER_POOLS'
+      AuthorizerId: !Ref GardenManagerRestAPIAuthorizer
+      ResourceId: !Ref SpeciesAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
+      RequestParameters:
+        'method.request.header.Authorization': true
+      Integration:
+        IntegrationHttpMethod: 'POST'
+        Type: 'AWS_PROXY'
+        Uri: !Sub
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
+          - { Lambda: !GetAtt EditPlantsLambda.Arn }
+
+  DeleteSpeciesAPIMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       OperationName: Read Reservation Event
-      HttpMethod: 'GET'
+      HttpMethod: 'DELETE'
       AuthorizationType: 'COGNITO_USER_POOLS'
-      AuthorizerId: !Ref CampingRestAPIAuthorizer
-      ResourceId: !Ref OrderIdAPIResource
-      RestApiId: !Ref CampingRestAPI
+      AuthorizerId: !Ref GardenManagerRestAPIAuthorizer
+      ResourceId: !Ref SpeciesIdAPIResource
+      RestApiId: !Ref GardenManagerRestAPI
       RequestParameters:
         'method.request.header.Authorization': true
-        'method.request.path.orderId': true
+        'method.request.path.speciesId': true
       Integration:
         IntegrationHttpMethod: 'POST'
         Type: 'AWS_PROXY'
         Uri: !Sub
           - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
-          - { Lambda: !GetAtt ReadOrderLambda.Arn }
+          - { Lambda: !GetAtt DeleteSpeciesLambda.Arn }
+# endregion API Methods
 
-  CreateOrderAPIMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      OperationName: Create Reservation Event
-      HttpMethod: 'POST'
-      AuthorizationType: 'COGNITO_USER_POOLS'
-      AuthorizerId: !Ref CampingRestAPIAuthorizer
-      ResourceId: !Ref CampsiteReservationAPIResource
-      RestApiId: !Ref CampingRestAPI
-      RequestParameters:
-        'method.request.header.Authorization': true
-        'method.request.path.campsiteid': true
-      Integration:
-        IntegrationHttpMethod: 'POST'
-        Type: 'AWS_PROXY'
-        Uri: !Sub
-          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Lambda}/invocations'
-          - { Lambda: !GetAtt CreateOrderLambda.Arn }
-
-  CampingRestAPIDeployment:
+  GardenManagerRestAPIDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
-      RestApiId: !Ref CampingRestAPI
+      RestApiId: !Ref GardenManagerRestAPI
     DependsOn:
-      - ReadCampgroundAvailabilityAPIMethod
-      - ReadAreaAvailabilityAPIMethod
-      - ReadCampsiteAvailabilityAPIMethod
-      - ReadOrderAPIMethod
-      - CreateOrderAPIMethod
+      - ReadPublicPlantsAPIMethod
+      - ReadAllPublicPlantsAPIMethod
+      - ReadAllPlantsAPIMethod
+      - ReadPlantsAPIMethod
+      - ReadGardenListAPIMethod
+      - EditPlantsAPIMethod
+      - DeleteSpeciesAPIMethod
 
-  CampingRestAPIStageV1:
+  GardenManagerRestAPIStageV1:
     Type: AWS::ApiGateway::Stage
     Properties:
-      DeploymentId: !Ref CampingRestAPIDeployment
-      RestApiId: !Ref CampingRestAPI
+      DeploymentId: !Ref GardenManagerRestAPIDeployment
+      RestApiId: !Ref GardenManagerRestAPI
       StageName: v1
       TracingEnabled: true
 
@@ -957,4 +781,4 @@ Outputs:
 
   ApiInvokeUrl:
     Description: Information about the value
-    Value: !Sub 'https://${CampingRestAPI}.execute-api.${AWS::Region}.amazonaws.com/${CampingRestAPIStageV1}'
+    Value: !Sub 'https://${GardenManagerRestAPI}.execute-api.${AWS::Region}.amazonaws.com/${GardenManagerRestAPIStageV1}'

@@ -2,15 +2,16 @@ import httpService from '@/common/http-service'
 import apiConfig from '@/config/api'
 
 const baseUrl = apiConfig.url + '/api/species'
+const baseUrlPublic = apiConfig.url + '/api/public/species'
 
 export default {
   getAllSpecies (authToken) {
-    const url = baseUrl
+    const url = authToken ? baseUrl : baseUrlPublic
     return httpService.get(url, authToken && { Authorization: authToken })
   },
 
   getSpecies (id, authToken) {
-    const url = baseUrl + '/' + id
+    const url = (authToken ? baseUrl : baseUrlPublic) + '/' + id
     return httpService.get(url, authToken && { Authorization: authToken })
   },
 
