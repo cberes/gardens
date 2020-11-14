@@ -1,6 +1,5 @@
 <script>
 import { mapActions } from 'vuex'
-import moment from 'moment'
 import authService from '@/auth/auth-service'
 import speciesService from './species-service'
 import PlantListEditor from '@/plant/PlantListEditor'
@@ -23,14 +22,14 @@ export default {
           { required: true, message: 'Please enter a name', trigger: 'blur' },
           { max: 100, message: 'Name is too long', trigger: 'blur' }
         ],
-        alternateName: [,
+        alternateName: [
           { max: 100, message: 'Alternate name is too long', trigger: 'blur' }
         ],
         light: [
-          { required: true, message: 'Light preference is required', trigger: 'blur' },
+          { required: true, message: 'Light preference is required', trigger: 'blur' }
         ],
         moisture: [
-          { required: true, message: 'Soil moisture preference is required', trigger: 'blur' },
+          { required: true, message: 'Soil moisture preference is required', trigger: 'blur' }
         ]
       }
     }
@@ -57,40 +56,40 @@ export default {
   },
   methods: {
     ...mapActions('plants', ['fetchSpecies', 'invalidateCache']),
-    plantDeleted(plant) {
+    plantDeleted (plant) {
       this.plantsToDelete.push(plant)
     },
-    onSubmit(formName) {
+    onSubmit (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.doSubmit()
         } else {
           this.$message.error('Please correct any errors')
-          return false;
+          return false
         }
-      });
+      })
     },
-    async doSubmit() {
+    async doSubmit () {
       const session = await authService.currentSession()
       const authToken = session.getIdToken().getJwtToken()
       speciesService.updateSpeciesAndPlants(this.species, authToken)
         .then(() => {
-            this.$message({
-              type: 'success',
-              message: 'Plant saved successfully'
-            })
+          this.$message({
+            type: 'success',
+            message: 'Plant saved successfully'
+          })
 
-            this.invalidateCache()
-            this.$router.push({ name: 'species-list' })
+          this.invalidateCache()
+          this.$router.push({ name: 'species-list' })
         })
         .catch(error => {
           console.error('Error saving plant')
           console.error(error)
-  
+
           this.$message.error('Uh oh, there was an error.')
         })
     },
-    onCancel() {
+    onCancel () {
       this.$router.go(-1)
     }
   }

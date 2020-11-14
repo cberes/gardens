@@ -23,5 +23,5 @@ export default {
   deleteSpecies (id, authToken) {
     const url = baseUrl + '/' + id
     return httpService.delete(url, { Authorization: authToken })
-  },
+  }
 }

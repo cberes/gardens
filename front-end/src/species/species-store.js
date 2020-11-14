@@ -26,7 +26,7 @@ const mutations = {
   },
   INVALIDATE_CACHE (state) {
     Vue.set(state, 'allSpecies', null)
-  },
+  }
 }
 
 const actions = {
@@ -36,9 +36,9 @@ const actions = {
     }
 
     const session = await authService.currentSession()
-    const authToken = sesstion && session.getIdToken().getJwtToken()
+    const authToken = session && session.getIdToken().getJwtToken()
 
-    return speciesService.getAllSpecies().then(result => {
+    return speciesService.getAllSpecies(authToken).then(result => {
       commit('SET_ALL_SPECIES', result.data.results)
       return result.data.results || []
     })
@@ -51,9 +51,9 @@ const actions = {
     }
 
     const session = await authService.currentSession()
-    const authToken = sesstion && session.getIdToken().getJwtToken()
+    const authToken = session && session.getIdToken().getJwtToken()
 
-    return speciesService.getSpecies(id).then(result => {
+    return speciesService.getSpecies(id, authToken).then(result => {
       commit('ADD_SPECIES', result.data.result)
       return result.data.result
     })
