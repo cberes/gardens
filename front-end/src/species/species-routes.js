@@ -14,7 +14,7 @@ export default [
     name: 'species',
     component: require('./species-view').default,
     props: true
-  }
+  },
   {
     path: '/plant/edit/:id',
     name: 'edit-species',

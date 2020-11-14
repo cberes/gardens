@@ -1,6 +1,5 @@
 <script>
 import { mapActions } from 'vuex'
-import speciesService from './species-service'
 
 export default {
   name: 'species-list',
@@ -23,11 +22,11 @@ export default {
         this.createGardenFilters(species)
         return species
       })
-      .then(doneLoading)
+      .then(this.doneLoading)
   },
   methods: {
     ...mapActions('plants', ['fetchAllSpecies']),
-    populateTable(species) {
+    populateTable (species) {
       species.forEach(aSpecies => {
         const tableItem = {
           id: aSpecies.species.id,
@@ -37,7 +36,7 @@ export default {
         this.species.push(tableItem)
       })
     },
-    createGardenFilters(species) {
+    createGardenFilters (species) {
       species.forEach(aSpecies => {
         aSpecies.plants.map(it => it.garden).forEach(value => {
           if (!this.garden.has(value)) {
@@ -47,10 +46,10 @@ export default {
         })
       })
     },
-    doneLoading() {
+    doneLoading () {
       this.loading = false
     },
-    formatArray(row, column, value) {
+    formatArray (row, column, value) {
       if (value.length === 0) {
         return ''
       } else if (value.length === 1) {
@@ -59,17 +58,17 @@ export default {
         return value[0] + ' and ' + (value.length - 1) + ' more'
       }
     },
-    filterArray(value, row, column) {
-      const property = column['property'];
-      return row[property].indexOf(value) !== -1;
+    filterArray (value, row, column) {
+      const property = column.property
+      return row[property].indexOf(value) !== -1
     },
-    clearFilter() {
-      this.$refs.species.clearFilter();
+    clearFilter () {
+      this.$refs.species.clearFilter()
     },
-    loadSpecies(id) {
+    loadSpecies (id) {
       this.$router.push({ name: 'species', params: { id } })
     },
-    addSpecies() {
+    addSpecies () {
       this.$router.push({ name: 'edit-species' })
     }
   }

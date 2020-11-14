@@ -2,7 +2,6 @@
 import { mapActions } from 'vuex'
 import moment from 'moment'
 import authService from '@/auth/auth-service'
-import speciesService from './species-service'
 
 export default {
   name: 'species',
@@ -33,10 +32,10 @@ export default {
   },
   methods: {
     ...mapActions('plants', ['deleteSpecies', 'fetchSpecies']),
-    editSpecies() {
+    editSpecies () {
       this.$router.push({ name: 'edit-species', params: { id: this.speciesId } })
     },
-    confirmDeleteSpecies() {
+    confirmDeleteSpecies () {
       this.$confirm('This will permanently delete the plant. Continue?', 'Warning', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
@@ -48,7 +47,7 @@ export default {
               type: 'success',
               message: 'Plant deleted successfully'
             })
-  
+
             this.$router.push({ name: 'species-list' })
           }).catch(() => {
             this.$message({
@@ -57,6 +56,9 @@ export default {
             })
           })
       })
+    },
+    plantDate (plant) {
+      return moment(plant.planted).format('YYYY/MM/DD')
     }
   }
 }
@@ -90,7 +92,7 @@ export default {
     </el-row>
     <el-row v-for="plant in species.plants" :key="plant.id" :gutter="20">
       <el-col :span="16">{{ plant.garden }}</el-col>
-      <el-col :span="8">{{ plant.planted }}</el-col>
+      <el-col :span="8">{{ plantDate(plant) }}</el-col>
     </el-row>
   </el-container>
 </template>

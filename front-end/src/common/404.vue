@@ -25,7 +25,7 @@ export default {
   <Layout :title="title">
     <p>We can't find what you're looking for.</p>
     <p>
-      Return to the <router-link to="/">campground home</router-link>.
+      Return to the <router-link to="/">plant list</router-link>.
     </p>
   </Layout>
 </template>

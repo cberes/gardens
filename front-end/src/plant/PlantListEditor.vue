@@ -1,6 +1,4 @@
 <script>
-import { mapActions } from 'vuex'
-import moment from 'moment'
 import authService from '@/auth/auth-service'
 import plantService from './plant-service'
 
@@ -34,7 +32,7 @@ export default {
     this.loadGardens()
   },
   methods: {
-    async loadGardens() {
+    async loadGardens () {
       const session = await authService.currentSession()
       const authToken = session.getIdToken().getJwtToken()
       plantService.getGardens(authToken)
@@ -42,14 +40,14 @@ export default {
           this.gardens = result.data.gardens
         })
     },
-    querySearch(queryString, cb) {
+    querySearch (queryString, cb) {
       const queryStringLower = queryString.toLowerCase()
       const results = this.gardens
         .filter(it => it.toLowerCase().indexOf(queryStringLower) === 0)
       this.resultsFound = results.length
       cb(results)
     },
-    handleSelect({ value: garden }) {
+    handleSelect ({ value: garden }) {
       this.plants.push({
         key: Date.now().toString(),
         garden
@@ -58,12 +56,12 @@ export default {
       this.$emit('input', this.plants)
       this.clearGarden()
     },
-    clearGarden() {
+    clearGarden () {
       this.newGarden = ''
     },
-    deletePlant(event) {
+    deletePlant (event) {
       const elem = event.target.parentElement
-      const plantKey = elem && elem.dataset['plantKey']
+      const plantKey = elem && elem.dataset.plantKey
       const index = this.plants.findIndex(it => it.key === plantKey)
       const plant = index !== -1 ? this.plants[index] : null
 
