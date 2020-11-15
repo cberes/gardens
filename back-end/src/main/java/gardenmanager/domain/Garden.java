@@ -31,8 +31,8 @@ public class Garden {
             return false;
         }
         final Garden garden = (Garden) o;
-        return Objects.equals(gardenerId, garden.gardenerId) &&
-                Objects.equals(name, garden.name);
+        return Objects.equals(gardenerId, garden.gardenerId)
+                && Objects.equals(name, garden.name);
     }
 
     @Override

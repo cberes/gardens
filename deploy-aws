@@ -11,7 +11,7 @@ env="$1"
 
 # create our variables
 stack_name="gardenmanager-$env"
-s3_dest=s3://cberes-gardenmanager/web-app-dist/
+s3_dest=s3://gardenmanager/web-app-dist/
 lambda_layer=$(ls -t serverless-web-app/build/distributions/lambda-layer-boneyard-*.zip | head -1)
 source_bundle=$(ls -t serverless-web-app/build/distributions/source-bundle-boneyard-*.zip | head -1)
 
@@ -34,7 +34,7 @@ fi
 # deploy the stack
 aws cloudformation $stack_op \
 --stack-name $stack_name \
---template-url 'https://cberes-gardenmanager.s3.amazonaws.com/web-app-dist/main.yml' \
+--template-url 'https://gardenmanager.s3.amazonaws.com/web-app-dist/main.yml' \
 --capabilities CAPABILITY_NAMED_IAM \
 --parameters '[
   {
