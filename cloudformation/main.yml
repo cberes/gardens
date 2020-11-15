@@ -128,10 +128,6 @@ Resources:
       AttributeDefinitions:
         - AttributeName: "ID"
           AttributeType: "S"
-        - AttributeName: "EMAIL"
-          AttributeType: "S"
-        - AttributeName: "JOINED"
-          AttributeType: "S"
       KeySchema:
         - AttributeName: "ID"
           KeyType: "HASH"
@@ -146,14 +142,6 @@ Resources:
         - AttributeName: "GARDENER_ID"
           AttributeType: "S"
         - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "NAME"
-          AttributeType: "S"
-        - AttributeName: "NAME_ALT"
-          AttributeType: "S"
-        - AttributeName: "LIGHT"
-          AttributeType: "S"
-        - AttributeName: "MOISTURE"
           AttributeType: "S"
       KeySchema:
         - AttributeName: "GARDENER_ID"
@@ -171,10 +159,6 @@ Resources:
         - AttributeName: "GARDENER_ID"
           AttributeType: "S"
         - AttributeName: "ID"
-          AttributeType: "S"
-        - AttributeName: "GARDEN"
-          AttributeType: "S"
-        - AttributeName: "PLANTED"
           AttributeType: "S"
       KeySchema:
         - AttributeName: "GARDENER_ID"
@@ -245,7 +229,7 @@ Resources:
       Description: Reads all of a user's plant species and plants after receiving HTTP GET from front end
       Code:
         S3Bucket: !Ref StagingBucketName
-        S3Key: !Join ['/', ['web-app-dist', !Ref SourceRuntimeBundleName]]
+        S3Key: !Join [ '/', [ 'web-app-dist', !Ref LambdaBundleName ] ]
       Handler: gardenmanager.webapp.Lambdas$LiveReadAllPlantsLambda::handleRequest
       Layers:
         - !Ref RuntimeClassPathLambdaLayer
@@ -262,7 +246,7 @@ Resources:
   ReadPlantsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ['-', [!Ref AppPrefix, 'read-order-list', !Ref EnvironmentName]]
+      FunctionName: !Join ['-', [!Ref AppPrefix, 'read-plants', !Ref EnvironmentName]]
       Description: Reads one of a user's plant species and plants after receiving HTTP GET from front end
       Code:
         S3Bucket: !Ref StagingBucketName
@@ -283,7 +267,7 @@ Resources:
   ReadGardenListLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ['-', [!Ref AppPrefix, 'read-order', !Ref EnvironmentName]]
+      FunctionName: !Join ['-', [!Ref AppPrefix, 'read-gardens', !Ref EnvironmentName]]
       Description: Reads all of a user's gardens after receiving HTTP GET from front end
       Code:
         S3Bucket: !Ref StagingBucketName
@@ -304,7 +288,7 @@ Resources:
   EditPlantsLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ['-', [!Ref AppPrefix, 'create-order', !Ref EnvironmentName]]
+      FunctionName: !Join ['-', [!Ref AppPrefix, 'edit-plants', !Ref EnvironmentName]]
       Description: Creates or updates a user's plant species and plants after receiving HTTP POST from front end
       Code:
         S3Bucket: !Ref StagingBucketName
@@ -325,7 +309,7 @@ Resources:
   DeleteSpeciesLambda:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ['-', [!Ref AppPrefix, 'create-order', !Ref EnvironmentName]]
+      FunctionName: !Join ['-', [!Ref AppPrefix, 'delete-species', !Ref EnvironmentName]]
       Description: Deletes a user's plant species and all associated plants after receiving HTTP POST from front end
       Code:
         S3Bucket: !Ref StagingBucketName
