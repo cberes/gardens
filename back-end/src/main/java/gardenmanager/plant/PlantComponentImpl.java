@@ -60,13 +60,24 @@ public class PlantComponentImpl implements PlantComponent {
     @Override
     public String save(final Plant plant) {
         requireGardenerId(plant);
+        requireSpeciesId(plant);
         return plants.save(plant);
     }
 
     private static void requireGardenerId(final Plant plant) {
-        if (plant.getGardenerId() == null || plant.getGardenerId().isEmpty()) {
+        if (isNullOrEmpty(plant.getGardenerId())) {
             throw new IllegalArgumentException("gardenerId is required");
         }
+    }
+
+    private static void requireSpeciesId(final Plant plant) {
+        if (isNullOrEmpty(plant.getSpeciesId())) {
+            throw new IllegalArgumentException("speciesId is required");
+        }
+    }
+
+    private static boolean isNullOrEmpty(final String s) {
+        return s == null || s.isEmpty();
     }
 
     @Override
