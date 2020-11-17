@@ -10,6 +10,9 @@ sourceCompatibility = 11
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://s3-us-west-2.amazonaws.com/dynamodb-local/release'
+    }
 }
 
 dependencies {
@@ -27,13 +30,36 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
     testImplementation 'org.hamcrest:hamcrest:2.2'
     testImplementation 'org.mockito:mockito-core:3.3.3'
+    testImplementation('com.amazonaws:DynamoDBLocal:1.13.5') {
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+    }
+    testImplementation 'org.slf4j:jcl-over-slf4j:1.7.25'
+    testImplementation 'org.slf4j:jul-to-slf4j:1.7.25'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.2'
+    testImplementation 'com.amazonaws:aws-lambda-java-log4j2:1.1.0'
+    testImplementation 'com.almworks.sqlite4java:sqlite4java:1.0.392'
+//    testImplementation 'org.apache.logging.log4j:log4j:2.8.2'
+}
+
+task copyNativeLibs(type: Copy) {
+    from(configurations.testRuntimeClasspath) {
+        include '*.dll'
+        include '*.dylib'
+        include '*.jnilib'
+        include '*.so'
+    }
+    into "$buildDir/native-libs"
 }
 
 test {
+    dependsOn copyNativeLibs
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
     }
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    environment 'NATIVE_LIBS_DIR', "$buildDir/native-libs"
+    environment 'APP_ENV_NAME', 'local'
 }
 
 static def bundleSuffix() {
