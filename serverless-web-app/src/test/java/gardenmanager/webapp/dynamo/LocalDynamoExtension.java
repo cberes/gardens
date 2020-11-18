@@ -1,15 +1,8 @@
 package gardenmanager.webapp.dynamo;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.*;
 
 import com.almworks.sqlite4java.SQLite;
-import gardenmanager.webapp.dynamo.tables.GardenerTable;
-import gardenmanager.webapp.dynamo.tables.PlantTable;
-import gardenmanager.webapp.dynamo.tables.SpeciesTable;
 import org.junit.jupiter.api.extension.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
@@ -19,11 +12,10 @@ import static java.util.stream.Collectors.toMap;
 public class LocalDynamoExtension implements TestInstancePostProcessor, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
     private volatile LocalDynamoDb localDynamo;
 
-    private final Map<String, DynamoTable> tablesByName = Stream.of(
-            new GardenerTable(),
-            new SpeciesTable(),
-            new PlantTable()
-    ).collect(toMap(DynamoTable::tableName, x -> x));
+    private final Map<String, DynamoTable> tablesByName =
+            ServiceLoader.load(DynamoTable.class).stream()
+                    .map(x -> x.get())
+                    .collect(toMap(DynamoTable::tableName, x -> x));
 
     @Override
     public void postProcessTestInstance(final Object instance, final ExtensionContext context) throws Exception {

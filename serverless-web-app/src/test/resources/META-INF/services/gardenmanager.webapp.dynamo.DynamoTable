@@ -1,0 +1,3 @@
+gardenmanager.webapp.dynamo.tables.GardenerTable
+gardenmanager.webapp.dynamo.tables.SpeciesTable
+gardenmanager.webapp.dynamo.tables.PlantTable
