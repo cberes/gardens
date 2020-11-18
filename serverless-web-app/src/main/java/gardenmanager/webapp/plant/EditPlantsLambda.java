@@ -2,7 +2,6 @@ package gardenmanager.webapp.plant;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -93,7 +92,9 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
             return Responses.badRequest(e.getMessage());
         }
 
-        setGardenerIds(input, request);
+        final Gardener gardener = gardeners.findOrCreateGardener(Cognito.username(input).get());
+
+        setGardenerIds(gardener, request);
 
         species.save(request.getSpecies());
         request.getPlants().forEach(plants::save);
@@ -103,13 +104,9 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
                 new SpeciesWithPlants(request.getSpecies(), request.getPlants()))));
     }
 
-    private void setGardenerIds(final APIGatewayProxyRequestEvent input, final Request request) {
-        final Optional<Gardener> gardener = Cognito.username(input).flatMap(gardeners::findGardenerByEmail);
-
-        gardener.map(Gardener::getId).ifPresent(gardenerId -> {
-            request.getSpecies().setGardenerId(gardenerId);
-            request.getPlants().forEach(plant -> plant.setGardenerId(gardenerId));
-            request.getPlantsToDelete().forEach(plant -> plant.setGardenerId(gardenerId));
-        });
+    private void setGardenerIds(final Gardener gardener, final Request request) {
+        request.getSpecies().setGardenerId(gardener.getId());
+        request.getPlants().forEach(plant -> plant.setGardenerId(gardener.getId()));
+        request.getPlantsToDelete().forEach(plant -> plant.setGardenerId(gardener.getId()));
     }
 }
