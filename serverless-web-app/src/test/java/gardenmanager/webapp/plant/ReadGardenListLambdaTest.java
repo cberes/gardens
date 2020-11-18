@@ -2,7 +2,6 @@ package gardenmanager.webapp.plant;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import gardenmanager.domain.Garden;
 import gardenmanager.domain.Gardener;
 import gardenmanager.domain.Species;
 import gardenmanager.webapp.dynamo.InjectDynamo;
@@ -13,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -59,8 +58,10 @@ public class ReadGardenListLambdaTest {
 
         ReadGardenListLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadGardenListLambda.Response.class);
-        assertThat(response.getGardens().stream().map(Garden::getName).collect(toList()),
-                containsInAnyOrder("Garden 1", "Garden 2", "Garden 3"));
+        assertThat(response.getGardens(), containsInAnyOrder(
+                hasProperty("name", equalTo("Garden 1")),
+                hasProperty("name", equalTo("Garden 2")),
+                hasProperty("name", equalTo("Garden 3"))));
     }
 
     @Test

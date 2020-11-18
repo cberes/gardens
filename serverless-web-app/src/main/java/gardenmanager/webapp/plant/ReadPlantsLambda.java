@@ -6,6 +6,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import gardenmanager.domain.Gardener;
 import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
@@ -19,7 +21,8 @@ public class ReadPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
     public static class Response {
         private final SpeciesWithPlants result;
 
-        public Response(final SpeciesWithPlants result) {
+        @JsonCreator
+        public Response(@JsonProperty("result") final SpeciesWithPlants result) {
             this.result = result;
         }
 
