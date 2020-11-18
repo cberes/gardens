@@ -21,6 +21,7 @@ public class DependencyFactory {
     private SpeciesComponent speciesComp;
     private PlantRepository plantRepo;
     private PlantComponent plantComp;
+    private PlantFactory plantFactory;
 
     public DependencyFactory(final DynamoDbClient dynamo) {
         this.dynamo = dynamo;
@@ -66,5 +67,12 @@ public class DependencyFactory {
             plantComp = new PlantComponentImpl(plantRepo(), speciesRepo());
         }
         return plantComp;
+    }
+
+    public PlantFactory plantFactory() {
+        if (plantFactory == null) {
+            plantFactory = new PlantFactory(speciesComp(), plantComp());
+        }
+        return plantFactory;
     }
 }

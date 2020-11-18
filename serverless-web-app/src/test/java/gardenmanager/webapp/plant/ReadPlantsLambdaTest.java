@@ -31,23 +31,13 @@ public class ReadPlantsLambdaTest {
         lambda = new ReadPlantsLambda(deps.plantComp(), deps.gardenerComp());
     }
 
-    private Species createSpecies(final String gardenerId, final String... gardens) {
-        Species species = DataFactory.species(gardenerId);
-        deps.speciesComp().save(species);
-
-        for (String garden : gardens) {
-            deps.plantComp().save(DataFactory.plant(gardenerId, species.getId(), garden));
-        }
-        return species;
-    }
-
     @Test
     void readPlantsOfGivenSpecies() throws Exception {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = createSpecies(gardener.getId(), "Garden 1", "Garden 2");
-        createSpecies(gardener.getId(), "Garden 2", "Garden 3");
+        Species species = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
+        deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
@@ -74,7 +64,7 @@ public class ReadPlantsLambdaTest {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = createSpecies(gardener.getId());
+        Species species = deps.plantFactory().createSpecies(gardener.getId());
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
@@ -99,7 +89,7 @@ public class ReadPlantsLambdaTest {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
+        Species species = deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
@@ -110,7 +100,7 @@ public class ReadPlantsLambdaTest {
     }
 
     @Test
-    void emptyDatabase() throws Exception {
+    void emptyDatabase() {
         final String email = "foo@example.com";
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();

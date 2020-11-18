@@ -6,7 +6,6 @@ import gardenmanager.domain.Gardener;
 import gardenmanager.domain.Species;
 import gardenmanager.webapp.dynamo.InjectDynamo;
 import gardenmanager.webapp.dynamo.UseTables;
-import gardenmanager.webapp.util.DataFactory;
 import gardenmanager.webapp.util.MockCognito;
 import gardenmanager.webapp.util.MockContext;
 import gardenmanager.webapp.util.MockParameters;
@@ -33,23 +32,13 @@ public class DeleteSpeciesLambdaTest {
         lambda = new DeleteSpeciesLambda(deps.speciesComp(), deps.gardenerComp());
     }
 
-    private Species createSpecies(final String gardenerId, final String... gardens) {
-        Species species = DataFactory.species(gardenerId);
-        deps.speciesComp().save(species);
-
-        for (String garden : gardens) {
-            deps.plantComp().save(DataFactory.plant(gardenerId, species.getId(), garden));
-        }
-        return species;
-    }
-
     @Test
     void deletesOnlyGivenSpeciesAndItsPlants() {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = createSpecies(gardener.getId(), "Garden 1", "Garden 2");
-        Species otherSpecies = createSpecies(gardener.getId(), "Garden 3");
+        Species species = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
+        Species otherSpecies = deps.plantFactory().createSpecies(gardener.getId(), "Garden 3");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
@@ -70,7 +59,7 @@ public class DeleteSpeciesLambdaTest {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
+        Species species = deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);

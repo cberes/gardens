@@ -7,7 +7,6 @@ import gardenmanager.domain.Species;
 import gardenmanager.webapp.dynamo.InjectDynamo;
 import gardenmanager.webapp.dynamo.UseTables;
 import gardenmanager.webapp.species.DependencyFactory;
-import gardenmanager.webapp.util.DataFactory;
 import gardenmanager.webapp.util.JsonUtils;
 import gardenmanager.webapp.util.MockCognito;
 import gardenmanager.webapp.util.MockContext;
@@ -34,25 +33,15 @@ public class ReadAllPlantsLambdaTest {
         lambda = new ReadAllPlantsLambda(deps.plantComp(), deps.gardenerComp());
     }
 
-    private Species createSpecies(final String gardenerId, final String... gardens) {
-        Species species = DataFactory.species(gardenerId);
-        deps.speciesComp().save(species);
-
-        for (String garden : gardens) {
-            deps.plantComp().save(DataFactory.plant(gardenerId, species.getId(), garden));
-        }
-        return species;
-    }
-
     @Test
     void readAllPlantsForCurrentUserOnly() throws Exception {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
         Gardener otherGardener = deps.gardenerComp().findOrCreateGardener("foo2@example.com");
 
-        Species species1 = createSpecies(gardener.getId(), "Garden 1", "Garden 2");
-        Species species2 = createSpecies(gardener.getId(), "Garden 2", "Garden 3");
-        createSpecies(otherGardener.getId(), "Garden 4", "Garden 5");
+        Species species1 = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
+        Species species2 = deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
+        deps.plantFactory().createSpecies(otherGardener.getId(), "Garden 4", "Garden 5");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
@@ -86,7 +75,7 @@ public class ReadAllPlantsLambdaTest {
         final String email = "foo@example.com";
         Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
+        deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
