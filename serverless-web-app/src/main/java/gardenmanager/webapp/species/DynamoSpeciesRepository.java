@@ -1,9 +1,6 @@
 package gardenmanager.webapp.species;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import gardenmanager.domain.LightPreference;
 import gardenmanager.domain.MoisturePreference;
@@ -15,6 +12,7 @@ import software.amazon.awssdk.services.dynamodb.model.*;
 
 import static gardenmanager.webapp.util.DynamoUtils.s;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class DynamoSpeciesRepository implements SpeciesRepository {
     private final String tableName = Tables.species();
@@ -87,8 +85,6 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
         final PutItemRequest request = PutItemRequest.builder()
                 .tableName(tableName)
                 .item(toAttrMap(species))
-                .expressionAttributeNames(Map.of(
-                        "#name", "NAME"))
                 .build();
         dynamo.putItem(request);
     }
@@ -97,7 +93,7 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
         return Map.of(
                 "ID", s(species.getId()),
                 "GARDENER_ID", s(species.getGardenerId()),
-                "#name", s(species.getName()),
+                "NAME", s(species.getName()),
                 "NAME_ALT", s(species.getAlternateName()),
                 "LIGHT", s(species.getLight().name()),
                 "MOISTURE", s(species.getMoisture().name()));
@@ -113,7 +109,7 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
                 .expressionAttributeNames(Map.of(
                         "#name", "NAME"))
                 .expressionAttributeValues(Map.of(
-                        ":name", attrMap.get("#name"),
+                        ":name", attrMap.get("NAME"),
                         ":nameAlt", attrMap.get("NAME_ALT"),
                         ":light", attrMap.get("LIGHT"),
                         ":moisture", attrMap.get("MOISTURE")))
@@ -124,7 +120,7 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
 
     @Override
     public void delete(final Species species) {
-        deletePlantsBySpecies(species);
+        getPlantIdsBySpecies(species).forEach(id -> deletePlant(species, id));
 
         final DeleteItemRequest request = DeleteItemRequest.builder()
                 .tableName(tableName)
@@ -135,15 +131,27 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
         dynamo.deleteItem(request);
     }
 
-    private void deletePlantsBySpecies(final Species species) {
+    private void deletePlant(final Species species, final String id) {
         final DeleteItemRequest request = DeleteItemRequest.builder()
                 .tableName(Tables.plant())
                 .key(Map.of(
-                        "GARDENER_ID", s(species.getGardenerId())))
-                .expressionAttributeValues(Map.of(
-                        ":speciesId", s(new PlantId(species.getId(), "").toString())))
-                .conditionExpression("begins_with(ID, :speciesId)")
+                        "GARDENER_ID", s(species.getGardenerId()),
+                        "ID", s(id)))
                 .build();
         dynamo.deleteItem(request);
+    }
+
+    private Set<String> getPlantIdsBySpecies(final Species species) {
+        final QueryRequest request = QueryRequest.builder()
+                .tableName(Tables.plant())
+                .projectionExpression("ID")
+                .expressionAttributeValues(Map.of(
+                        ":gardenerId", s(species.getGardenerId()),
+                        ":speciesId", s(new PlantId(species.getId(), "").toString())))
+                .keyConditionExpression("GARDENER_ID = :gardenerId and begins_with(ID, :speciesId)")
+                .build();
+        return dynamo.query(request).items().stream()
+                .map(it -> it.get("ID").s())
+                .collect(toSet());
     }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.*;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public class LocalDynamoExtension implements TestInstancePostProcessor, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
@@ -62,13 +63,10 @@ public class LocalDynamoExtension implements TestInstancePostProcessor, BeforeEa
 
     private void createTables(final DynamoDbClient client, final Object instance) {
         final Set<String> tableNames = tableNames(client);
-        UseTables[] uses = instance.getClass().getAnnotationsByType(UseTables.class);
-        for (UseTables use : uses) {
-            for (String tableName : use.value()) {
-                DynamoTable table = tablesByName.get(tableName);
-                if (!tableNames.contains(table.tableName())) {
-                    table.createTable(client);
-                }
+        for (String tableName : tablesUsed(instance)) {
+            DynamoTable table = tablesByName.get(tableName);
+            if (!tableNames.contains(table.tableName())) {
+                table.createTable(client);
             }
         }
     }
@@ -77,16 +75,20 @@ public class LocalDynamoExtension implements TestInstancePostProcessor, BeforeEa
         return new HashSet<>(dynamo.listTables().tableNames());
     }
 
+    private List<String> tablesUsed(final Object testInstance) {
+        final UseTables[] uses = testInstance.getClass().getAnnotationsByType(UseTables.class);
+        return Arrays.stream(uses)
+                .flatMap(use -> Arrays.stream(use.value()))
+                .collect(toList());
+    }
+
     private void deleteTables(final DynamoDbClient client, final Object instance) {
         final Set<String> tableNames = tableNames(client);
-        UseTables[] uses = instance.getClass().getAnnotationsByType(UseTables.class);
-        for (UseTables use : uses) {
-            for (String tableName : use.value()) {
-                if (tableNames.contains(tableName)) {
-                    client.deleteTable(DeleteTableRequest.builder()
-                            .tableName(tableName)
-                            .build());
-                }
+        for (String tableName : tablesUsed(instance)) {
+            if (tableNames.contains(tableName)) {
+                client.deleteTable(DeleteTableRequest.builder()
+                        .tableName(tableName)
+                        .build());
             }
         }
     }
