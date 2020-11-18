@@ -57,7 +57,10 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
                 .tableName(tableName)
                 .projectionExpression("GARDENER_ID, ID, #name, NAME_ALT, LIGHT, MOISTURE")
                 .consistentRead(false)
-                .expressionAttributeValues(Map.of(":gardener_id", s(gardenerId)))
+                .expressionAttributeNames(Map.of(
+                        "#name", "NAME"))
+                .expressionAttributeValues(Map.of(
+                        ":gardener_id", s(gardenerId)))
                 .keyConditionExpression("GARDENER_ID = :gardener_id")
                 .build();
 
