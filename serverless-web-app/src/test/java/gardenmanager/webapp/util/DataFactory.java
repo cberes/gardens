@@ -2,15 +2,21 @@ package gardenmanager.webapp.util;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
-import gardenmanager.domain.LightPreference;
-import gardenmanager.domain.MoisturePreference;
-import gardenmanager.domain.Plant;
-import gardenmanager.domain.Species;
+import gardenmanager.domain.*;
 
 public final class DataFactory {
     private DataFactory() {
         throw new UnsupportedOperationException("cannot instantiate " + getClass());
+    }
+
+    public static Gardener gardener(final String id, final String email) {
+        final Gardener gardener = new Gardener();
+        gardener.setId(id);
+        gardener.setEmail(email);
+        gardener.setJoined(ZonedDateTime.now(ZoneOffset.UTC));
+        return gardener;
     }
 
     public static Species species(final String gardenerId) {

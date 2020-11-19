@@ -8,7 +8,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gardenmanager.domain.Gardener;
 import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
@@ -16,6 +15,7 @@ import gardenmanager.webapp.util.Cognito;
 import gardenmanager.webapp.util.JsonUtils;
 
 import static gardenmanager.webapp.util.Responses.ok;
+import static java.util.Collections.emptyList;
 
 public class ReadAllPlantsLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     public static class Response {
@@ -46,11 +46,10 @@ public class ReadAllPlantsLambda implements RequestHandler<APIGatewayProxyReques
 
         context.getLogger().log("Authenticated username is  " + Cognito.username(input).orElse(null));
 
-        final String gardenerId = Cognito.username(input)
-                .flatMap(gardeners::findGardenerByEmail)
-                .map(Gardener::getId)
-                .orElse("public");
+        var results = GardenerLookup.gardenerId(input, gardeners)
+                .map(plants::findPlantsByGardenerId)
+                .orElse(emptyList());
 
-        return ok(JsonUtils.toJson(new Response(plants.findPlantsByGardenerId(gardenerId))));
+        return ok(JsonUtils.toJson(new Response(results)));
     }
 }

@@ -15,14 +15,10 @@ public class Cognito {
 
     @SuppressWarnings("unchecked")
     public static Optional<String> username(final APIGatewayProxyRequestEvent input) {
-        final var authorizer = input.getRequestContext().getAuthorizer();
-        if (authorizer == null) {
-            return Optional.empty();
-        }
-
-        final var claims = (Map<String, ?>) authorizer.get("claims");
-        return Optional.ofNullable(claims)
-                .map(it -> it.get("cognito:username"))
+        return Optional.ofNullable(input.getRequestContext())
+                .map(context -> context.getAuthorizer())
+                .map(authorizer -> (Map<String, ?>) authorizer.get("claims"))
+                .map(claims -> claims.get("cognito:username"))
                 .map(Object::toString);
     }
 }

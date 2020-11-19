@@ -8,7 +8,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import gardenmanager.domain.Gardener;
 import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
@@ -48,13 +47,9 @@ public class ReadPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
 
         final String speciesId = input.getPathParameters().get("speciesId");
 
-        final String gardenerId = Cognito.username(input)
-                .flatMap(gardeners::findGardenerByEmail)
-                .map(Gardener::getId)
-                .orElse("public");
-
-        final Optional<SpeciesWithPlants> found = plants.findPlantsBySpeciesId(speciesId)
-                .filter(it -> it.getSpecies().getGardenerId().equals(gardenerId));
+        final Optional<SpeciesWithPlants> found = GardenerLookup.gardenerId(input, gardeners)
+                .flatMap(gardenerId -> plants.findPlantsBySpeciesId(speciesId)
+                        .filter(it -> it.getSpecies().getGardenerId().equals(gardenerId)));
 
         if (found.isEmpty()) {
             return Responses.notFound(JsonUtils.toJson(new ErrorMessage("Species not found: " + speciesId)));
