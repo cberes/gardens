@@ -37,8 +37,13 @@ export default {
       const authToken = session.getIdToken().getJwtToken()
       plantService.getGardens(authToken)
         .then(result => {
-          this.gardens = result.data.gardens
+          return result.data.gardens || []
         })
+        .catch(error => {
+          console.error('Failed to get gardens', error)
+          return []
+        })
+        .then(gardenList => (this.gardens = gardenList))
     },
     querySearch (queryString, cb) {
       const queryStringLower = queryString.toLowerCase()

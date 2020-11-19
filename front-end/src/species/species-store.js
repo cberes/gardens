@@ -38,10 +38,15 @@ const actions = {
     const session = await authService.currentSession()
     const authToken = session && session.getIdToken().getJwtToken()
 
-    return speciesService.getAllSpecies(authToken).then(result => {
-      commit('SET_ALL_SPECIES', result.data.results)
-      return result.data.results || []
-    })
+    return speciesService.getAllSpecies(authToken)
+      .then(result => {
+        commit('SET_ALL_SPECIES', result.data.results)
+        return result.data.results || []
+      })
+      .catch(error => {
+        console.error('Failed to get all species', error)
+        return []
+      })
   },
   async fetchSpecies ({ commit, state, rootState }, id) {
     const found = (state.allSpecies || []).find(it => it.id === id)
@@ -53,10 +58,15 @@ const actions = {
     const session = await authService.currentSession()
     const authToken = session && session.getIdToken().getJwtToken()
 
-    return speciesService.getSpecies(id, authToken).then(result => {
-      commit('ADD_SPECIES', result.data.result)
-      return result.data.result
-    })
+    return speciesService.getSpecies(id, authToken)
+      .then(result => {
+        commit('ADD_SPECIES', result.data.result)
+        return result.data.result
+      })
+      .catch(error => {
+        console.error(`Failed to get species ${id}`, error)
+        return []
+      })
   },
   async deleteSpecies ({ commit, state, rootState }, id) {
     commit('DELETE_SPECIES', id)
