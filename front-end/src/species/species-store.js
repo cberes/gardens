@@ -63,10 +63,6 @@ const actions = {
         commit('ADD_SPECIES', result.data.result)
         return result.data.result
       })
-      .catch(error => {
-        console.error(`Failed to get species ${id}`, error)
-        return []
-      })
   },
   async deleteSpecies ({ commit, state, rootState }, id) {
     commit('DELETE_SPECIES', id)
