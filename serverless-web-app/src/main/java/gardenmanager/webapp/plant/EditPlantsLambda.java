@@ -7,6 +7,8 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gardenmanager.domain.Gardener;
 import gardenmanager.domain.Plant;
@@ -16,6 +18,7 @@ import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
 import gardenmanager.species.SpeciesComponent;
 import gardenmanager.webapp.util.Cognito;
+import gardenmanager.webapp.util.ErrorMessage;
 import gardenmanager.webapp.util.JsonUtils;
 import gardenmanager.webapp.util.Responses;
 
@@ -55,7 +58,8 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
     public static class Response {
         private final SpeciesWithPlants result;
 
-        public Response(final SpeciesWithPlants result) {
+        @JsonCreator
+        public Response(@JsonProperty("result") final SpeciesWithPlants result) {
             this.result = result;
         }
 
@@ -63,6 +67,8 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
             return result;
         }
     }
+
+    private static class GardenerNotFoundException extends Exception {}
 
     private final ObjectMapper jackson;
     private final SpeciesComponent species;
@@ -85,28 +91,42 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
 
         context.getLogger().log("Authenticated username is  " + Cognito.username(input).orElse(null));
 
-        final Request request;
         try {
-            request = jackson.readValue(input.getBody(), Request.class);
+            final Request request = jackson.readValue(input.getBody(), Request.class);
+            final String username = Cognito.username(input).orElseThrow(GardenerNotFoundException::new);
+            return handleRequestAuthenticated(request, username);
         } catch (IOException e) {
             return Responses.badRequest(e.getMessage());
+        } catch (GardenerNotFoundException e) {
+            return Responses.forbidden(JsonUtils.toJson(new ErrorMessage("Forbidden")));
         }
+    }
 
-        final Gardener gardener = gardeners.findOrCreateGardener(Cognito.username(input).get());
+    private APIGatewayProxyResponseEvent handleRequestAuthenticated(final Request request, final String username) {
+        final Gardener gardener = gardeners.findOrCreateGardener(username);
 
-        setGardenerIds(gardener, request);
+        saveSpecies(request, gardener);
 
-        species.save(request.getSpecies());
-        request.getPlants().forEach(plants::save);
-        request.getPlantsToDelete().forEach(plants::delete);
+        savePlants(request, gardener);
 
         return Responses.created(JsonUtils.toJson(new Response(
                 new SpeciesWithPlants(request.getSpecies(), request.getPlants()))));
     }
 
-    private void setGardenerIds(final Gardener gardener, final Request request) {
+    private void saveSpecies(final Request request, final Gardener gardener) {
         request.getSpecies().setGardenerId(gardener.getId());
+        species.save(request.getSpecies());
+    }
+
+    private void savePlants(final Request request, final Gardener gardener) {
+        setIds(request, gardener);
+        request.getPlants().forEach(plants::save);
+        request.getPlantsToDelete().forEach(plants::delete);
+    }
+
+    private void setIds(final Request request, final Gardener gardener) {
         request.getPlants().forEach(plant -> plant.setGardenerId(gardener.getId()));
+        request.getPlants().forEach(plant -> plant.setSpeciesId(request.getSpecies().getId()));
         request.getPlantsToDelete().forEach(plant -> plant.setGardenerId(gardener.getId()));
     }
 }
