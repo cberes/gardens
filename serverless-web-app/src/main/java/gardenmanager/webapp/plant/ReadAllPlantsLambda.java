@@ -3,7 +3,6 @@ package gardenmanager.webapp.plant;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -11,13 +10,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
+import gardenmanager.webapp.util.ApiRequestHandler;
 import gardenmanager.webapp.util.Cognito;
 import gardenmanager.webapp.util.JsonUtils;
+import gardenmanager.webapp.util.Responses;
 
-import static gardenmanager.webapp.util.Responses.ok;
 import static java.util.Collections.emptyList;
 
-public class ReadAllPlantsLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class ReadAllPlantsLambda implements ApiRequestHandler {
     public static class Response {
         private final List<SpeciesWithPlants> results;
 
@@ -50,6 +50,6 @@ public class ReadAllPlantsLambda implements RequestHandler<APIGatewayProxyReques
                 .map(plants::findPlantsByGardenerId)
                 .orElse(emptyList());
 
-        return ok(JsonUtils.toJson(new Response(results)));
+        return Responses.ok(JsonUtils.toJson(new Response(results)));
     }
 }

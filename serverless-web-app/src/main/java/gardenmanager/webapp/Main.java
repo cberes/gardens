@@ -3,10 +3,9 @@ package gardenmanager.webapp;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import gardenmanager.webapp.Lambdas.*;
+import gardenmanager.webapp.util.ApiRequestHandler;
 import gardenmanager.webapp.util.AwsUtils;
 
 /**
@@ -28,7 +27,7 @@ public final class Main {
         }
     }
 
-    private static Map<String, Supplier<RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent>>> handlers() {
+    private static Map<String, Supplier<ApiRequestHandler>> handlers() {
         return Map.of(
                 "read_garden_list", LiveReadGardenListLambda::new,
                 "create_gardener", LiveCreateGardenerLambda::new,

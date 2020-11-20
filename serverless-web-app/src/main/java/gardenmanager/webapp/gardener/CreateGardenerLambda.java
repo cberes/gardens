@@ -3,17 +3,13 @@ package gardenmanager.webapp.gardener;
 import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import gardenmanager.domain.Gardener;
 import gardenmanager.gardener.GardenerComponent;
-import gardenmanager.webapp.util.Cognito;
-import gardenmanager.webapp.util.JsonUtils;
-import gardenmanager.webapp.util.Ok;
-import gardenmanager.webapp.util.Responses;
+import gardenmanager.webapp.util.*;
 
-public class CreateGardenerLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class CreateGardenerLambda implements ApiRequestHandler {
     private final GardenerComponent gardeners;
 
     public CreateGardenerLambda(final GardenerComponent gardeners) {

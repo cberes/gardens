@@ -34,19 +34,15 @@ public class ReadPlantsLambdaTest {
     @Test
     void readPlantsOfGivenSpecies() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
+        final Species species = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
         deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "speciesId", species.getId());
-
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email, species.getId());
         assertThat(responseEvent.getStatusCode(), is(200));
 
-        ReadPlantsLambda.Response response =
+        final ReadPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadPlantsLambda.Response.class);
 
         assertThat(response.getResult(), notNullValue());
@@ -59,21 +55,25 @@ public class ReadPlantsLambdaTest {
                 hasProperty("garden", equalTo("Garden 2"))));
     }
 
+    private APIGatewayProxyResponseEvent execute(final String email, final String speciesId) {
+        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
+        MockCognito.mockUsername(input, email);
+        MockParameters.mockPathParam(input, "speciesId", speciesId);
+
+        return lambda.handleRequest(input, new MockContext());
+    }
+
     @Test
     void readSpeciesWithoutPlants() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = deps.plantFactory().createSpecies(gardener.getId());
+        final Species species = deps.plantFactory().createSpecies(gardener.getId());
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "speciesId", species.getId());
-
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email, species.getId());
         assertThat(responseEvent.getStatusCode(), is(200));
 
-        ReadPlantsLambda.Response response =
+        final ReadPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadPlantsLambda.Response.class);
 
         assertThat(response.getResult(), notNullValue());
@@ -87,15 +87,11 @@ public class ReadPlantsLambdaTest {
     @Test
     void readPlantsFromOtherGardener() {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
-        Species species = deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
+        final Species species = deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "speciesId", species.getId());
-
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email, species.getId());
         assertThat(responseEvent.getStatusCode(), is(404));
     }
 
@@ -103,11 +99,7 @@ public class ReadPlantsLambdaTest {
     void emptyDatabase() {
         final String email = "foo@example.com";
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "speciesId", "dW5rbm93bg==:unknown");
-
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email, "dW5rbm93bg==:unknown");
         assertThat(responseEvent.getStatusCode(), is(404));
     }
 }

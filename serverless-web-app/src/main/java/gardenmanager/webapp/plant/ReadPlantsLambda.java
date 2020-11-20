@@ -3,7 +3,6 @@ package gardenmanager.webapp.plant;
 import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -11,12 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
-import gardenmanager.webapp.util.Cognito;
-import gardenmanager.webapp.util.ErrorMessage;
-import gardenmanager.webapp.util.JsonUtils;
-import gardenmanager.webapp.util.Responses;
+import gardenmanager.webapp.util.*;
 
-public class ReadPlantsLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class ReadPlantsLambda implements ApiRequestHandler {
     public static class Response {
         private final SpeciesWithPlants result;
 

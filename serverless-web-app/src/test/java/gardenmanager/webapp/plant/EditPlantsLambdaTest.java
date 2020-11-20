@@ -44,7 +44,7 @@ public class EditPlantsLambdaTest {
     @Test
     void createPlantsForExistingGardener() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
         createPlants(email, is(gardener.getId()));
     }
 
@@ -59,12 +59,12 @@ public class EditPlantsLambdaTest {
                 DataFactory.plant(null, null, "Garden 2")));
         input.setBody(JsonUtils.toJson(request));
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(201));
 
-        EditPlantsLambda.Response response =
+        final EditPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), EditPlantsLambda.Response.class);
-        Species species = response.getResult().getSpecies();
+        final Species species = response.getResult().getSpecies();
         assertThat(species, allOf(
                 hasProperty("id", not(emptyOrNullString())),
                 hasProperty("gardenerId", gardenerMatcher)));
@@ -84,8 +84,8 @@ public class EditPlantsLambdaTest {
     @Test
     void updateSpeciesAndCreatePlants() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-        Species species = DataFactory.species(gardener.getId());
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Species species = DataFactory.species(gardener.getId());
         deps.speciesComp().save(species);
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
@@ -98,10 +98,10 @@ public class EditPlantsLambdaTest {
                 DataFactory.plant(null, null, "Garden 2")));
         input.setBody(JsonUtils.toJson(request));
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(201));
 
-        EditPlantsLambda.Response response =
+        final EditPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), EditPlantsLambda.Response.class);
         assertThat(response.getResult().getSpecies(), allOf(
                 hasProperty("id", is(species.getId())),
@@ -122,11 +122,11 @@ public class EditPlantsLambdaTest {
     @Test
     void updateSpeciesAndUpdatePlants() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-        Species species = DataFactory.species(gardener.getId());
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Species species = DataFactory.species(gardener.getId());
         deps.speciesComp().save(species);
 
-        List<Plant> plants = List.of(
+        final List<Plant> plants = List.of(
                 DataFactory.plant(gardener.getId(), species.getId(), "Garden 1"),
                 DataFactory.plant(gardener.getId(), species.getId(), "Garden 2"));
         plants.forEach(deps.plantComp()::save);
@@ -144,10 +144,10 @@ public class EditPlantsLambdaTest {
         request.setPlants(plants);
         input.setBody(JsonUtils.toJson(request));
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(201));
 
-        SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
+        final SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
         assertThat(readPlants.getSpecies(), allOf(
                 hasProperty("id", is(species.getId())),
                 hasProperty("gardenerId", is(gardener.getId())),
@@ -171,8 +171,8 @@ public class EditPlantsLambdaTest {
     @Test
     void deletePlants() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-        Species species = DataFactory.species(gardener.getId());
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Species species = DataFactory.species(gardener.getId());
         deps.speciesComp().save(species);
 
         List<Plant> plants = List.of(
@@ -190,10 +190,10 @@ public class EditPlantsLambdaTest {
         request.setPlantsToDelete(List.of(plants.get(0), plants.get(2)));
         input.setBody(JsonUtils.toJson(request));
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(201));
 
-        SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
+        final SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
         assertThat(readPlants.getSpecies(), allOf(
                 hasProperty("id", is(species.getId())),
                 hasProperty("gardenerId", is(gardener.getId()))));
@@ -205,8 +205,6 @@ public class EditPlantsLambdaTest {
                         hasProperty("garden", equalTo("Garden 2")))));
     }
 
-    // TODO test save with delete
-
     @Test
     void minimalRequest() throws Exception {
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
@@ -214,10 +212,10 @@ public class EditPlantsLambdaTest {
 
         input.setBody("{\"species\":{\"name\":\"\"}}");
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(201));
 
-        EditPlantsLambda.Response response =
+        final EditPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), EditPlantsLambda.Response.class);
 
         assertThat(response.getResult().getSpecies(), allOf(
@@ -233,7 +231,7 @@ public class EditPlantsLambdaTest {
 
         input.setBody("{}");
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(400));
     }
 
@@ -241,7 +239,7 @@ public class EditPlantsLambdaTest {
     void noAuthentication() {
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         input.setBody("{\"species\":{\"name\":\"\"}}");
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
         assertThat(responseEvent.getStatusCode(), is(403));
     }
 }

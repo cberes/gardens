@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -17,14 +16,11 @@ import gardenmanager.domain.SpeciesWithPlants;
 import gardenmanager.gardener.GardenerComponent;
 import gardenmanager.plant.PlantComponent;
 import gardenmanager.species.SpeciesComponent;
-import gardenmanager.webapp.util.Cognito;
-import gardenmanager.webapp.util.ErrorMessage;
-import gardenmanager.webapp.util.JsonUtils;
-import gardenmanager.webapp.util.Responses;
+import gardenmanager.webapp.util.*;
 
 import static java.util.Collections.emptyList;
 
-public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class EditPlantsLambda implements ApiRequestHandler {
     public static class Request {
         private Species species;
         private List<Plant> plants = emptyList();

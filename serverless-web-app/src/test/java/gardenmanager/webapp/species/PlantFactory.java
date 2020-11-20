@@ -15,12 +15,12 @@ public class PlantFactory {
     }
 
     public Species createSpecies(final String gardenerId, final String... gardens) {
-        Species aSpecies = DataFactory.species(gardenerId);
-        species.save(aSpecies);
+        Species dbSpecies = DataFactory.species(gardenerId);
+        species.save(dbSpecies);
 
         for (String garden : gardens) {
-            plants.save(DataFactory.plant(gardenerId, aSpecies.getId(), garden));
+            plants.save(DataFactory.plant(gardenerId, dbSpecies.getId(), garden));
         }
-        return aSpecies;
+        return dbSpecies;
     }
 }

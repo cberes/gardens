@@ -36,11 +36,11 @@ public class ReadAllPlantsLambdaTest {
     @Test
     void readAllPlantsForCurrentUserOnly() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-        Gardener otherGardener = deps.gardenerComp().findOrCreateGardener("foo2@example.com");
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener otherGardener = deps.gardenerComp().findOrCreateGardener("foo2@example.com");
 
-        Species species1 = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
-        Species species2 = deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
+        final Species species1 = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
+        final Species species2 = deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
         deps.plantFactory().createSpecies(otherGardener.getId(), "Garden 4", "Garden 5");
 
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
@@ -73,7 +73,7 @@ public class ReadAllPlantsLambdaTest {
     @Test
     void gardenerHasNoPlants() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
 
         deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 

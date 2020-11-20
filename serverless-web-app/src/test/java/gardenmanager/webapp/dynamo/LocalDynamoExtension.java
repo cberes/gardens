@@ -10,7 +10,9 @@ import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-public class LocalDynamoExtension implements TestInstancePostProcessor, BeforeEachCallback, AfterEachCallback, ExtensionContext.Store.CloseableResource {
+public class LocalDynamoExtension
+        implements TestInstancePostProcessor, BeforeEachCallback, AfterEachCallback,
+        ExtensionContext.Store.CloseableResource {
     private volatile LocalDynamoDb localDynamo;
 
     private final Map<String, DynamoTable> tablesByName =

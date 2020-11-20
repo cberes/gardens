@@ -5,7 +5,7 @@ import gardenmanager.webapp.util.Tables;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 
-public class PlantTable implements DynamoTable {
+public class PlantTable implements DynamoTable, DynamoOps {
     @Override
     public String tableName() {
         return Tables.plant();
@@ -16,22 +16,12 @@ public class PlantTable implements DynamoTable {
         dynamo.createTable(CreateTableRequest.builder()
                 .tableName(Tables.plant())
                 .billingMode(BillingMode.PAY_PER_REQUEST)
-                .attributeDefinitions(AttributeDefinition.builder()
-                                .attributeName("GARDENER_ID")
-                                .attributeType(ScalarAttributeType.S)
-                                .build(),
-                        AttributeDefinition.builder()
-                                .attributeName("ID")
-                                .attributeType(ScalarAttributeType.S)
-                                .build())
-                .keySchema(KeySchemaElement.builder()
-                                .attributeName("GARDENER_ID")
-                                .keyType(KeyType.HASH)
-                                .build(),
-                        KeySchemaElement.builder()
-                                .attributeName("ID")
-                                .keyType(KeyType.RANGE)
-                                .build())
+                .attributeDefinitions(
+                        attribute("GARDENER_ID", ScalarAttributeType.S),
+                        attribute("ID", ScalarAttributeType.S))
+                .keySchema(
+                        key("GARDENER_ID", KeyType.HASH),
+                        key("ID", KeyType.RANGE))
                 .build());
     }
 }

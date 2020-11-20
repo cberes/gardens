@@ -30,8 +30,8 @@ public class PlantId {
             return false;
         }
         final PlantId id = (PlantId) o;
-        return speciesId.equals(id.speciesId) &&
-                plantId.equals(id.plantId);
+        return speciesId.equals(id.speciesId)
+                && plantId.equals(id.plantId);
     }
 
     @Override

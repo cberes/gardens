@@ -3,7 +3,6 @@ package gardenmanager.webapp.species;
 import java.util.Optional;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import gardenmanager.domain.Gardener;
@@ -16,7 +15,7 @@ import gardenmanager.webapp.util.JsonUtils;
 import gardenmanager.webapp.util.Ok;
 import gardenmanager.webapp.util.*;
 
-public class DeleteSpeciesLambda implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class DeleteSpeciesLambda implements ApiRequestHandler {
     private final SpeciesComponent species;
     private final GardenerComponent gardeners;
 

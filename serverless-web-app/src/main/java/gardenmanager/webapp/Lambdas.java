@@ -32,7 +32,8 @@ public final class Lambdas {
 
     public static class LiveEditPlantsLambda extends EditPlantsLambda {
         public LiveEditPlantsLambda() {
-            super(JsonUtils.jackson(), Singletons.speciesComponent(), Singletons.plantComponent(), Singletons.gardenerComponent());
+            super(JsonUtils.jackson(), Singletons.speciesComponent(), Singletons.plantComponent(),
+                    Singletons.gardenerComponent());
         }
     }
 

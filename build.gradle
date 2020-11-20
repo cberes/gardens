@@ -10,7 +10,7 @@ def javaProjects = [
 
 configure(javaProjects) {
     apply plugin: 'java'
-//    apply plugin: 'checkstyle'
+    apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: 'idea'
 
@@ -25,13 +25,13 @@ configure(javaProjects) {
             }
         }
 
-//        checkstyle {
-//            checkstyleMain.exclude '**/module-info.java'
-//            configDirectory = file("$rootDir/config/checkstyle")
-//            toolVersion = '8.2'
-//            maxErrors = 0
-//            maxWarnings = 0
-//        }
+        checkstyle {
+            checkstyleMain.exclude '**/module-info.java'
+            configDirectory = file("$rootDir/config/checkstyle")
+            toolVersion = '8.2'
+            maxErrors = 0
+            maxWarnings = 10 // TODO reset to 0
+        }
 
         jacoco {
             toolVersion = '0.8.5'

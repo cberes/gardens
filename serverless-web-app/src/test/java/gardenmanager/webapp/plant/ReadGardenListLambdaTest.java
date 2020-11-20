@@ -32,20 +32,17 @@ public class ReadGardenListLambdaTest {
     @Test
     void getsUniqueListOfGardensForCurrentUserOnly() throws Exception {
         final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-        Gardener otherGardener = deps.gardenerComp().findOrCreateGardener("foo2@example.com");
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener otherGardener = deps.gardenerComp().findOrCreateGardener("foo2@example.com");
 
         deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
         deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
         deps.plantFactory().createSpecies(otherGardener.getId(), "Garden 4", "Garden 5");
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email);
         assertThat(responseEvent.getStatusCode(), is(200));
 
-        ReadGardenListLambda.Response response =
+        final ReadGardenListLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadGardenListLambda.Response.class);
         assertThat(response.getGardens(), containsInAnyOrder(
                 hasProperty("name", equalTo("Garden 1")),
@@ -53,20 +50,24 @@ public class ReadGardenListLambdaTest {
                 hasProperty("name", equalTo("Garden 3"))));
     }
 
-    @Test
-    void gardenerHasNoPlants() throws Exception {
-        final String email = "foo@example.com";
-        Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-
-        deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
-
+    private APIGatewayProxyResponseEvent execute(final String email) {
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
 
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        return lambda.handleRequest(input, new MockContext());
+    }
+
+    @Test
+    void gardenerHasNoPlants() throws Exception {
+        final String email = "foo@example.com";
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+
+        deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
+
+        final APIGatewayProxyResponseEvent responseEvent = execute(email);
         assertThat(responseEvent.getStatusCode(), is(200));
 
-        ReadGardenListLambda.Response response =
+        final ReadGardenListLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadGardenListLambda.Response.class);
         assertThat(response.getGardens(), hasSize(0));
     }
@@ -75,13 +76,10 @@ public class ReadGardenListLambdaTest {
     void emptyDatabase() throws Exception {
         final String email = "foo@example.com";
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-
-        APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email);
         assertThat(responseEvent.getStatusCode(), is(200));
 
-        ReadGardenListLambda.Response response =
+        final ReadGardenListLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadGardenListLambda.Response.class);
         assertThat(response.getGardens(), hasSize(0));
     }
