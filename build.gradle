@@ -1,0 +1,54 @@
+allprojects {
+    group 'gardenmanager'
+    version projectVersion
+}
+
+def javaProjects = [
+        project(':back-end'),
+        project(':serverless-web-app')
+]
+
+configure(javaProjects) {
+    apply plugin: 'java'
+//    apply plugin: 'checkstyle'
+    apply plugin: 'jacoco'
+    apply plugin: 'idea'
+
+    sourceCompatibility = 11
+    targetCompatibility = 11
+
+    afterEvaluate {
+        jar {
+            inputs.property("moduleName", moduleName)
+            manifest {
+                attributes('Automatic-Module-Name': moduleName)
+            }
+        }
+
+//        checkstyle {
+//            checkstyleMain.exclude '**/module-info.java'
+//            configDirectory = file("$rootDir/config/checkstyle")
+//            toolVersion = '8.2'
+//            maxErrors = 0
+//            maxWarnings = 0
+//        }
+
+        jacoco {
+            toolVersion = '0.8.5'
+        }
+
+        jacocoTestReport {
+            dependsOn test
+        }
+
+        jacocoTestCoverageVerification {
+            violationRules {
+                rule {
+                    limit {
+                        minimum = 0.6
+                    }
+                }
+            }
+        }
+    }
+}

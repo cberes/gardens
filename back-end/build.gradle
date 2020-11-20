@@ -1,11 +1,4 @@
-group 'gardenmanager'
-version projectVersion
-
-apply plugin: 'java'
-apply plugin: 'checkstyle'
-apply plugin: 'idea'
-
-sourceCompatibility = 11
+ext.moduleName = 'gardenmanager.webapp'
 
 repositories {
     mavenCentral()
@@ -20,14 +13,6 @@ dependencies {
 test {
     useJUnitPlatform()
     testLogging {
-        events "passed", "skipped", "failed"
+        events 'passed', 'skipped', 'failed'
     }
-}
-
-checkstyle {
-    checkstyleMain.exclude '**/module-info.java'
-    configDirectory = file("$rootDir/config/checkstyle")
-    toolVersion = '8.2'
-    maxErrors = 0
-    maxWarnings = 0
 }

@@ -1,12 +1,6 @@
 import java.text.SimpleDateFormat
 
-group 'gardenmanager'
-version projectVersion
-
-apply plugin: 'java'
-apply plugin: 'idea'
-
-sourceCompatibility = 11
+ext.moduleName = 'gardenmanager.webapp'
 
 repositories {
     mavenCentral()
@@ -54,7 +48,7 @@ test {
     dependsOn copyNativeLibs
     useJUnitPlatform()
     testLogging {
-        events "passed", "skipped", "failed"
+        events 'passed', 'skipped', 'failed'
     }
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
     environment 'NATIVE_LIBS_DIR', "$buildDir/native-libs"
