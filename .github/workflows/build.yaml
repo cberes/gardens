@@ -12,4 +12,4 @@ jobs:
         with:
           node-version: '12'
       - run: chmod +x gradlew
-      - run: ./gradlew clean build
+      - run: ./gradlew clean build --no-daemon
