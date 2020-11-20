@@ -97,9 +97,11 @@ public class DynamoSpeciesRepository implements SpeciesRepository {
                 "ID", s(species.getId()),
                 "GARDENER_ID", s(species.getGardenerId()),
                 "NAME", s(species.getName()),
-                "NAME_ALT", s(species.getAlternateName()),
-                "LIGHT", s(species.getLight().name()),
-                "MOISTURE", s(species.getMoisture().name()));
+                "NAME_ALT", s(Optional.ofNullable(species.getAlternateName()).orElse("")),
+                "LIGHT", s(Optional.ofNullable(species.getLight())
+                        .orElse(LightPreference.FULL).name()),
+                "MOISTURE", s(Optional.ofNullable(species.getMoisture())
+                        .orElse(MoisturePreference.MEDIUM).name()));
     }
 
     private void update(final Species species) {

@@ -2,7 +2,6 @@ package gardenmanager.webapp.util;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 
 import gardenmanager.domain.*;
 

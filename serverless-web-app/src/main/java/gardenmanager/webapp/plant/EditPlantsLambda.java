@@ -70,6 +70,12 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
 
     private static class GardenerNotFoundException extends Exception {}
 
+    private static class MissingFieldException extends Exception {
+        public MissingFieldException(final String message) {
+            super(message);
+        }
+    }
+
     private final ObjectMapper jackson;
     private final SpeciesComponent species;
     private final PlantComponent plants;
@@ -93,12 +99,25 @@ public class EditPlantsLambda implements RequestHandler<APIGatewayProxyRequestEv
 
         try {
             final Request request = jackson.readValue(input.getBody(), Request.class);
+            requireSpecies(request);
             final String username = Cognito.username(input).orElseThrow(GardenerNotFoundException::new);
             return handleRequestAuthenticated(request, username);
         } catch (IOException e) {
             return Responses.badRequest(e.getMessage());
+        } catch (MissingFieldException e) {
+            return Responses.badRequest(e.getMessage());
         } catch (GardenerNotFoundException e) {
             return Responses.forbidden(JsonUtils.toJson(new ErrorMessage("Forbidden")));
+        }
+    }
+
+    private static void requireSpecies(final Request request) throws MissingFieldException {
+        if (request.getSpecies() == null) {
+            throw new MissingFieldException("Species is required");
+        }
+
+        if (request.getSpecies().getName() == null) {
+            throw new MissingFieldException("Species name is required");
         }
     }
 
