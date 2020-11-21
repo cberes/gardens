@@ -6,8 +6,6 @@ export default {
   data () {
     return {
       species: [],
-      garden: new Set(),
-      gardenFilters: [],
       error: null,
       loading: true
     }
@@ -15,40 +13,38 @@ export default {
   mounted () {
     this.fetchAllSpecies()
       .then(species => {
-        this.populateTable(species)
-        return species
+        this.species = species
+        this.loading = false
       })
-      .then(species => {
-        this.createGardenFilters(species)
-        return species
-      })
-      .then(this.doneLoading)
   },
-  methods: {
-    ...mapActions('plants', ['fetchAllSpecies']),
-    populateTable (species) {
-      species.forEach(aSpecies => {
-        const tableItem = {
-          id: aSpecies.species.id,
-          name: aSpecies.species.name,
-          gardens: aSpecies.plants.map(it => it.garden)
-        }
-        this.species.push(tableItem)
-      })
-    },
-    createGardenFilters (species) {
-      species.forEach(aSpecies => {
-        aSpecies.plants.map(it => it.garden).forEach(value => {
-          if (!this.garden.has(value)) {
-            this.garden.add(value)
-            this.gardenFilters.push({ text: value, value })
+  computed: {
+    gardenFilters () {
+      const filters = []
+      const garden = new Set()
+
+      this.species.forEach(theSpecies => {
+        theSpecies.plants.map(it => it.garden).forEach(value => {
+          if (!garden.has(value)) {
+            garden.add(value)
+            filters.push({ text: value, value })
           }
         })
       })
+
+      return filters
     },
-    doneLoading () {
-      this.loading = false
-    },
+    tableRows () {
+      return this.species.map(theSpecies => {
+        return {
+          id: theSpecies.species.id,
+          name: theSpecies.species.name,
+          gardens: theSpecies.plants.map(it => it.garden)
+        }
+      })
+    }
+  },
+  methods: {
+    ...mapActions('species', ['fetchAllSpecies']),
     formatArray (row, column, value) {
       if (value.length === 0) {
         return ''
@@ -76,7 +72,7 @@ export default {
 </script>
 
 <template>
-  <el-container>
+  <el-container direction="vertical">
     <el-row>
       <el-button @click="clearFilter">Reset filters</el-button>
       <el-button @click="addSpecies">Add plant</el-button>
@@ -85,7 +81,7 @@ export default {
       <el-table
         ref="species"
         v-loading="loading"
-        :data="species"
+        :data="tableRows"
         style="width: 100%">
         <el-table-column
           prop="name"
@@ -106,12 +102,6 @@ export default {
           :formatter="formatArray"
           :filters="gardenFilters"
           :filter-method="filterArray">
-          <template slot-scope="scope">
-            {{ scope.row.gardens }}
-            <el-tag
-              :type="scope.row.tag === 'Home' ? 'primary' : 'success'"
-              disable-transitions>{{scope.row.tag}}</el-tag>
-          </template>
         </el-table-column>
       </el-table>
     </el-row>

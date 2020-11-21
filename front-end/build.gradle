@@ -2,15 +2,13 @@ plugins {
   id 'com.moowork.node' version '1.2.0'
 }
 
-group 'gardenmanager'
-version = projectVersion
-
-task assemble(type: NpmTask, dependsOn: 'npmInstall') {
+task build(type: NpmTask, dependsOn: 'npmInstall') {
   args = ['run', 'build']
+  finalizedBy 'test'
 }
 
 task test(type: NpmTask, dependsOn: 'npmInstall') {
-    args = ['run', 'test']
+    args = ['run', 'test:unit']
 }
 
 task check(dependsOn: 'test')
