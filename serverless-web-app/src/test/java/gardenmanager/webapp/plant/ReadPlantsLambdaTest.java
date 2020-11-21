@@ -33,26 +33,29 @@ public class ReadPlantsLambdaTest {
 
     @Test
     void readPlantsOfGivenSpecies() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
 
         final Species species = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
         deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
 
-        final APIGatewayProxyResponseEvent responseEvent = execute(email, species.getId());
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail(), species.getId());
         assertThat(responseEvent.getStatusCode(), is(200));
 
         final ReadPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadPlantsLambda.Response.class);
 
+        assertSpecies(species, response);
+        assertThat(response.getResult().getPlants(), containsInAnyOrder(
+                hasProperty("garden", equalTo("Garden 1")),
+                hasProperty("garden", equalTo("Garden 2"))));
+    }
+
+    private void assertSpecies(final Species species, final ReadPlantsLambda.Response response) {
         assertThat(response.getResult(), notNullValue());
         assertThat(response.getResult().getSpecies(), allOf(
                 hasProperty("id", equalTo(species.getId())),
                 hasProperty("gardenerId", equalTo(species.getGardenerId())),
                 hasProperty("name", equalTo(species.getName()))));
-        assertThat(response.getResult().getPlants(), containsInAnyOrder(
-                hasProperty("garden", equalTo("Garden 1")),
-                hasProperty("garden", equalTo("Garden 2"))));
     }
 
     private APIGatewayProxyResponseEvent execute(final String email, final String speciesId) {
@@ -65,41 +68,33 @@ public class ReadPlantsLambdaTest {
 
     @Test
     void readSpeciesWithoutPlants() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
 
         final Species species = deps.plantFactory().createSpecies(gardener.getId());
 
-        final APIGatewayProxyResponseEvent responseEvent = execute(email, species.getId());
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail(), species.getId());
         assertThat(responseEvent.getStatusCode(), is(200));
 
         final ReadPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), ReadPlantsLambda.Response.class);
 
-        assertThat(response.getResult(), notNullValue());
-        assertThat(response.getResult().getSpecies(), allOf(
-                hasProperty("id", equalTo(species.getId())),
-                hasProperty("gardenerId", equalTo(species.getGardenerId())),
-                hasProperty("name", equalTo(species.getName()))));
+        assertSpecies(species, response);
         assertThat(response.getResult().getPlants(), hasSize(0));
     }
 
     @Test
     void readPlantsFromOtherGardener() {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
 
         final Species species = deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
-        final APIGatewayProxyResponseEvent responseEvent = execute(email, species.getId());
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail(), species.getId());
         assertThat(responseEvent.getStatusCode(), is(404));
     }
 
     @Test
     void emptyDatabase() {
-        final String email = "foo@example.com";
-
-        final APIGatewayProxyResponseEvent responseEvent = execute(email, "dW5rbm93bg==:unknown");
+        final APIGatewayProxyResponseEvent responseEvent = execute("foo@example.com", "dW5rbm93bg==:unknown");
         assertThat(responseEvent.getStatusCode(), is(404));
     }
 }

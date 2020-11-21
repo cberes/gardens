@@ -34,15 +34,12 @@ public class DeleteSpeciesLambdaTest {
 
     @Test
     void deletesOnlyGivenSpeciesAndItsPlants() {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
 
         final Species species = deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
         final Species otherSpecies = deps.plantFactory().createSpecies(gardener.getId(), "Garden 3");
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "plantId", species.getId());
+        final APIGatewayProxyRequestEvent input = execute(gardener.getEmail(), species.getId());
 
         final APIGatewayProxyResponseEvent response = lambda.handleRequest(input, new MockContext());
         assertThat(response.getStatusCode(), is(200));
@@ -54,16 +51,20 @@ public class DeleteSpeciesLambdaTest {
         assertThat(deps.plantRepo().findAllBySpeciesId(otherSpecies.getId()), hasSize(1));
     }
 
+    private APIGatewayProxyRequestEvent execute(final String email, final String speciesId) {
+        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
+        MockCognito.mockUsername(input, email);
+        MockParameters.mockPathParam(input, "plantId", speciesId);
+        return input;
+    }
+
     @Test
     void doesNotDeleteSpeciesBelongingToOtherGardener() {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
 
         final Species species = deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "plantId", species.getId());
+        final APIGatewayProxyRequestEvent input = execute(gardener.getEmail(), species.getId());
 
         final APIGatewayProxyResponseEvent response = lambda.handleRequest(input, new MockContext());
         assertThat(response.getStatusCode(), is(404));
@@ -74,11 +75,7 @@ public class DeleteSpeciesLambdaTest {
 
     @Test
     void deleteWhenEmptyDatabase() {
-        final String email = "foo@example.com";
-
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "plantId", "dW5rbm93bg==:unknown");
+        final APIGatewayProxyRequestEvent input = execute("foo@example.com", "dW5rbm93bg==:unknown");
 
         final APIGatewayProxyResponseEvent response = lambda.handleRequest(input, new MockContext());
         assertThat(response.getStatusCode(), is(404));

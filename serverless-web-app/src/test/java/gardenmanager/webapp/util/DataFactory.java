@@ -2,8 +2,12 @@ package gardenmanager.webapp.util;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import gardenmanager.domain.*;
+
+import static java.util.stream.Collectors.toList;
 
 public final class DataFactory {
     private DataFactory() {
@@ -35,5 +39,11 @@ public final class DataFactory {
         plant.setGarden(garden);
         plant.setPlanted(ZonedDateTime.now(ZoneOffset.UTC));
         return plant;
+    }
+
+    public static List<Plant> plants(final String gardenerId, final String speciesId, final String... gardens) {
+        return Arrays.stream(gardens)
+                .map(garden -> DataFactory.plant(gardenerId, speciesId, garden))
+                .collect(toList());
     }
 }

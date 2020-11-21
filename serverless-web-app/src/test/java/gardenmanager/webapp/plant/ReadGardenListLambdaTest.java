@@ -31,15 +31,14 @@ public class ReadGardenListLambdaTest {
 
     @Test
     void getsUniqueListOfGardensForCurrentUserOnly() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
         final Gardener otherGardener = deps.gardenerComp().findOrCreateGardener("foo2@example.com");
 
         deps.plantFactory().createSpecies(gardener.getId(), "Garden 1", "Garden 2");
         deps.plantFactory().createSpecies(gardener.getId(), "Garden 2", "Garden 3");
         deps.plantFactory().createSpecies(otherGardener.getId(), "Garden 4", "Garden 5");
 
-        final APIGatewayProxyResponseEvent responseEvent = execute(email);
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail());
         assertThat(responseEvent.getStatusCode(), is(200));
 
         final ReadGardenListLambda.Response response =
@@ -59,12 +58,11 @@ public class ReadGardenListLambdaTest {
 
     @Test
     void gardenerHasNoPlants() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
 
         deps.plantFactory().createSpecies("other" + gardener.getId(), "Garden 1", "Garden 2");
 
-        final APIGatewayProxyResponseEvent responseEvent = execute(email);
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail());
         assertThat(responseEvent.getStatusCode(), is(200));
 
         final ReadGardenListLambda.Response response =
@@ -74,9 +72,7 @@ public class ReadGardenListLambdaTest {
 
     @Test
     void emptyDatabase() throws Exception {
-        final String email = "foo@example.com";
-
-        final APIGatewayProxyResponseEvent responseEvent = execute(email);
+        final APIGatewayProxyResponseEvent responseEvent = execute("foo@example.com");
         assertThat(responseEvent.getStatusCode(), is(200));
 
         final ReadGardenListLambda.Response response =

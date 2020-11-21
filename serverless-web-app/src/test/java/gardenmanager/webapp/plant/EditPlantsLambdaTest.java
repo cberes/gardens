@@ -17,7 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -43,23 +44,16 @@ public class EditPlantsLambdaTest {
 
     @Test
     void createPlantsForExistingGardener() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
-        createPlants(email, is(gardener.getId()));
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
+        createPlants(gardener.getEmail(), is(gardener.getId()));
     }
 
     private void createPlants(final String email, final Matcher<String> gardenerMatcher) throws Exception {
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
+        final Species inputSpecies = DataFactory.species(null);
+        final List<Plant> plants = DataFactory.plants(null, null, "Garden 1", "Garden 2");
+        final EditPlantsLambda.Request request = makeRequest(inputSpecies, plants);
 
-        final EditPlantsLambda.Request request = new EditPlantsLambda.Request();
-        request.setSpecies(DataFactory.species(null));
-        request.setPlants(List.of(
-                DataFactory.plant(null, null, "Garden 1"),
-                DataFactory.plant(null, null, "Garden 2")));
-        input.setBody(JsonUtils.toJson(request));
-
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(email, JsonUtils.toJson(request));
         assertThat(responseEvent.getStatusCode(), is(201));
 
         final EditPlantsLambda.Response response =
@@ -68,151 +62,130 @@ public class EditPlantsLambdaTest {
         assertThat(species, allOf(
                 hasProperty("id", not(emptyOrNullString())),
                 hasProperty("gardenerId", gardenerMatcher)));
-        assertThat(response.getResult().getPlants(), containsInAnyOrder(
-                allOf(
-                        hasProperty("id", not(emptyOrNullString())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden 1"))),
-                allOf(
-                        hasProperty("id", not(emptyOrNullString())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden 2")))));
+        assertThat(response.getResult().getPlants(), matches(species, plants, false));
+    }
+
+    private APIGatewayProxyResponseEvent execute(final String email, final String body) {
+        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
+        input.setBody(body);
+
+        if (email != null) {
+            MockCognito.mockUsername(input, email);
+        }
+
+        return lambda.handleRequest(input, new MockContext());
     }
 
     @Test
     void updateSpeciesAndCreatePlants() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
         final Species species = DataFactory.species(gardener.getId());
         deps.speciesComp().save(species);
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
+        final List<Plant> plants = DataFactory.plants(null, null, "Garden 1", "Garden 2");
+        final EditPlantsLambda.Request request = makeRequest(species, plants);
 
-        final EditPlantsLambda.Request request = new EditPlantsLambda.Request();
-        request.setSpecies(species);
-        request.setPlants(List.of(
-                DataFactory.plant(null, null, "Garden 1"),
-                DataFactory.plant(null, null, "Garden 2")));
-        input.setBody(JsonUtils.toJson(request));
-
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail(), JsonUtils.toJson(request));
         assertThat(responseEvent.getStatusCode(), is(201));
 
         final EditPlantsLambda.Response response =
                 JsonUtils.jackson().readValue(responseEvent.getBody(), EditPlantsLambda.Response.class);
-        assertThat(response.getResult().getSpecies(), allOf(
+        assertThat(response.getResult().getSpecies(), matches(species, gardener));
+        assertThat(response.getResult().getPlants(), matches(species, plants, false));
+    }
+
+    private static Matcher<Species> matches(final Species species, final Gardener gardener) {
+        return allOf(
                 hasProperty("id", is(species.getId())),
-                hasProperty("gardenerId", is(gardener.getId()))));
-        assertThat(response.getResult().getPlants(), containsInAnyOrder(
-                allOf(
-                        hasProperty("id", not(emptyOrNullString())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden 1"))),
-                allOf(
-                        hasProperty("id", not(emptyOrNullString())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden 2")))));
+                hasProperty("gardenerId", is(gardener.getId())),
+                hasProperty("name", is(species.getName())),
+                hasProperty("alternateName", is(species.getAlternateName())),
+                hasProperty("moisture", is(species.getMoisture())),
+                hasProperty("light", is(species.getLight())));
+    }
+
+    private static Matcher<Iterable<? extends Plant>> matches(final Species species,
+                                                              final List<Plant> plants,
+                                                              final boolean matchId) {
+        return containsInAnyOrder(plants.stream()
+                .map(plant -> hasPlant(species, plant, matchId))
+                .collect(toList()));
+    }
+
+    private static Matcher<Plant> hasPlant(final Species species, final Plant plant, final boolean matchId) {
+        return allOf(
+                hasProperty("id", matchId ? is(plant.getId()) : not(emptyOrNullString())),
+                hasProperty("gardenerId", is(species.getGardenerId())),
+                hasProperty("speciesId", is(species.getId())),
+                hasProperty("garden", is(plant.getGarden())));
     }
 
     @Test
-    void updateSpeciesAndUpdatePlants() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+    void updateSpeciesAndUpdatePlants() {
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
         final Species species = DataFactory.species(gardener.getId());
         deps.speciesComp().save(species);
 
-        final List<Plant> plants = List.of(
-                DataFactory.plant(gardener.getId(), species.getId(), "Garden 1"),
-                DataFactory.plant(gardener.getId(), species.getId(), "Garden 2"));
+        final List<Plant> plants = DataFactory.plants(gardener.getId(), species.getId(), "Garden 1", "Garden 2");
         plants.forEach(deps.plantComp()::save);
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
+        modifyPlants(species, plants);
 
+        final EditPlantsLambda.Request request = makeRequest(species, plants);
+
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail(), JsonUtils.toJson(request));
+        assertThat(responseEvent.getStatusCode(), is(201));
+
+        final SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
+        assertThat(readPlants.getSpecies(), matches(species, gardener));
+        assertThat(readPlants.getPlants(), matches(species, plants, true));
+    }
+
+    private static void modifyPlants(final Species species, final List<Plant> plants) {
         species.setName("Species Uno");
         species.setAlternateName("Alt species uno");
         plants.get(0).setGarden("Garden Uno");
         plants.get(1).setGarden("Garden Dos");
-
-        final EditPlantsLambda.Request request = new EditPlantsLambda.Request();
-        request.setSpecies(species);
-        request.setPlants(plants);
-        input.setBody(JsonUtils.toJson(request));
-
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
-        assertThat(responseEvent.getStatusCode(), is(201));
-
-        final SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
-        assertThat(readPlants.getSpecies(), allOf(
-                hasProperty("id", is(species.getId())),
-                hasProperty("gardenerId", is(gardener.getId())),
-                hasProperty("name", is("Species Uno")),
-                hasProperty("alternateName", is("Alt species uno")),
-                hasProperty("moisture", is(MoisturePreference.MEDIUM)),
-                hasProperty("light", is(LightPreference.FULL))));
-        assertThat(readPlants.getPlants(), containsInAnyOrder(
-                allOf(
-                        hasProperty("id", is(plants.get(0).getId())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden Uno"))),
-                allOf(
-                        hasProperty("id", is(plants.get(1).getId())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden Dos")))));
     }
 
     @Test
-    void deletePlants() throws Exception {
-        final String email = "foo@example.com";
-        final Gardener gardener = deps.gardenerComp().findOrCreateGardener(email);
+    void deletePlants() {
+        final Gardener gardener = deps.gardenerComp().findOrCreateGardener("foo@example.com");
         final Species species = DataFactory.species(gardener.getId());
         deps.speciesComp().save(species);
 
-        List<Plant> plants = List.of(
-                DataFactory.plant(gardener.getId(), species.getId(), "Garden 1"),
-                DataFactory.plant(gardener.getId(), species.getId(), "Garden 2"),
-                DataFactory.plant(gardener.getId(), species.getId(), "Garden 3"));
+        List<Plant> plants = DataFactory.plants(gardener.getId(), species.getId(), "Garden 1", "Garden 2", "Garden 3");
         plants.forEach(deps.plantComp()::save);
 
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, email);
+        final EditPlantsLambda.Request request = makeRequest(species,
+                List.of(plants.get(1)), List.of(plants.get(0), plants.get(2)));
 
-        final EditPlantsLambda.Request request = new EditPlantsLambda.Request();
-        request.setSpecies(species);
-        request.setPlants(List.of(plants.get(1)));
-        request.setPlantsToDelete(List.of(plants.get(0), plants.get(2)));
-        input.setBody(JsonUtils.toJson(request));
-
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final APIGatewayProxyResponseEvent responseEvent = execute(gardener.getEmail(), JsonUtils.toJson(request));
         assertThat(responseEvent.getStatusCode(), is(201));
 
         final SpeciesWithPlants readPlants = deps.plantComp().findPlantsBySpeciesId(species.getId()).get();
-        assertThat(readPlants.getSpecies(), allOf(
-                hasProperty("id", is(species.getId())),
-                hasProperty("gardenerId", is(gardener.getId()))));
-        assertThat(readPlants.getPlants(), containsInAnyOrder(
-                allOf(
-                        hasProperty("id", is(plants.get(1).getId())),
-                        hasProperty("gardenerId", is(species.getGardenerId())),
-                        hasProperty("speciesId", is(species.getId())),
-                        hasProperty("garden", equalTo("Garden 2")))));
+        assertThat(readPlants.getSpecies(), matches(species, gardener));
+        assertThat(readPlants.getPlants(), matches(species, List.of(plants.get(1)), true));
+    }
+
+    private static EditPlantsLambda.Request makeRequest(final Species species, final List<Plant> keepPlants) {
+        return makeRequest(species, keepPlants, emptyList());
+    }
+
+    private static EditPlantsLambda.Request makeRequest(final Species species,
+                                                        final List<Plant> keepPlants,
+                                                        final List<Plant> deletePlants) {
+        final EditPlantsLambda.Request request = new EditPlantsLambda.Request();
+        request.setSpecies(species);
+        request.setPlants(keepPlants);
+        request.setPlantsToDelete(deletePlants);
+        return request;
     }
 
     @Test
     void minimalRequest() throws Exception {
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, "foo@example.com");
-
-        input.setBody("{\"species\":{\"name\":\"\"}}");
-
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final String body = "{\"species\":{\"name\":\"\"}}";
+        final APIGatewayProxyResponseEvent responseEvent = execute("foo@example.com", body);
         assertThat(responseEvent.getStatusCode(), is(201));
 
         final EditPlantsLambda.Response response =
@@ -225,21 +198,16 @@ public class EditPlantsLambdaTest {
     }
 
     @Test
-    void emptyRequest() throws Exception {
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        MockCognito.mockUsername(input, "foo@example.com");
-
-        input.setBody("{}");
-
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+    void emptyRequest() {
+        final String body = "{}";
+        final APIGatewayProxyResponseEvent responseEvent = execute("foo@example.com", body);
         assertThat(responseEvent.getStatusCode(), is(400));
     }
 
     @Test
     void noAuthentication() {
-        final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
-        input.setBody("{\"species\":{\"name\":\"\"}}");
-        final APIGatewayProxyResponseEvent responseEvent = lambda.handleRequest(input, new MockContext());
+        final String body = "{\"species\":{\"name\":\"\"}}";
+        final APIGatewayProxyResponseEvent responseEvent = execute(null, body);
         assertThat(responseEvent.getStatusCode(), is(403));
     }
 }

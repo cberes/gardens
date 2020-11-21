@@ -30,7 +30,7 @@ configure(javaProjects) {
             configDirectory = file("$rootDir/config/checkstyle")
             toolVersion = '8.2'
             maxErrors = 0
-            maxWarnings = 10 // TODO reset to 0
+            maxWarnings = 0
         }
 
         jacoco {
