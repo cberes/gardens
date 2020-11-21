@@ -1,0 +1,28 @@
+h1, h2 {
+  text-transform: uppercase;
+  font-weight: normal;
+}
+header {
+  padding: 1vh 0 0 1vw;
+}
+h1 {
+  font-size: 12vw;
+  margin: 0 auto 3vh;
+  color: #f9c74f;
+}
+h2 {
+  font-size: 11vw;
+  margin: 0 auto 3vh;
+  color: #f8961e;
+}
+footer {
+  margin-top: 7vh;
+  padding: 3vh 0 3vh 2vw;
+  background-color: #577590;
+  color: #90be6d;
+}
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  background-color: #4d908e;
+}
+
