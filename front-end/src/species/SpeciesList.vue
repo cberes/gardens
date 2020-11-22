@@ -103,6 +103,9 @@ export default {
           :filters="gardenFilters"
           :filter-method="filterArray">
         </el-table-column>
+        <template slot="empty">
+          Click <strong>Add plant</strong> to add a new plant.
+        </template>
       </el-table>
     </el-row>
   </el-container>
