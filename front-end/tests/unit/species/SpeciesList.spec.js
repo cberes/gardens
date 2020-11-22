@@ -68,9 +68,6 @@ describe('Species List', () => {
   }
 
   it('renders species table with plants', async () => {
-    // const wrapper = shallowMount(SpeciesList, {
-    //   propsData: { msg }
-    // })
     const wrapper = await factory(createTestData())
 
     expect(wrapper.find('.el-table').exists()).to.equal(true)

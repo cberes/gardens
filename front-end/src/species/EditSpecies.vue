@@ -55,7 +55,7 @@ export default {
       })
   },
   methods: {
-    ...mapActions('plants', ['fetchSpecies', 'invalidateCache']),
+    ...mapActions('species', ['fetchSpecies', 'invalidateCache']),
     plantDeleted (plant) {
       this.plantsToDelete.push(plant)
     },

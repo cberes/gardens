@@ -1,10 +1,10 @@
 <script>
 import { mapActions } from 'vuex'
-import moment from 'moment'
-import authService from '@/auth/auth-service'
+import PlantList from '@/plant/PlantList'
 
 export default {
   name: 'species',
+  components: { PlantList },
   props: {
     speciesId: {
       type: String,
@@ -14,24 +14,26 @@ export default {
   data () {
     return {
       species: null,
+      plants: null,
       loading: true,
       signedIn: null
     }
   },
   created () {
-    authService.currentSession()
+    this.currentSession()
       .then(session => (this.signedIn = !!session))
   },
   mounted () {
     this.fetchSpecies(this.speciesId)
-      .then(species => {
-        this.species = species
+      .then(result => {
+        this.species = result.species
+        this.plants = result.plants
         this.loading = false
-        return species
       })
   },
   methods: {
-    ...mapActions('plants', ['deleteSpecies', 'fetchSpecies']),
+    ...mapActions('auth', ['currentSession']),
+    ...mapActions('species', ['deleteSpecies', 'fetchSpecies']),
     editSpecies () {
       this.$router.push({ name: 'edit-species', params: { id: this.speciesId } })
     },
@@ -41,6 +43,7 @@ export default {
         cancelButtonText: 'Cancel',
         type: 'warning'
       }).then(() => {
+        console.log(`deleting species ${this.speciesId}`)
         this.deleteSpecies(this.speciesId)
           .then(() => {
             this.$message({
@@ -55,10 +58,16 @@ export default {
               message: 'Delete failed'
             })
           })
+      }).catch(() => {
+        console.log('canceled delete')
       })
     },
-    plantDate (plant) {
-      return moment(plant.planted).format('YYYY/MM/DD')
+    formatEnum (s) {
+      if (s) {
+        return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase().replace('_', ' ')
+      } else {
+        return ''
+      }
     }
   }
 }
@@ -82,18 +91,15 @@ export default {
       {{ species.alternateName }}
     </el-row>
     <el-row :gutter="20">
-      {{ species.moisture }}
+      {{ formatEnum(species.moisture) }}
     </el-row>
     <el-row :gutter="20">
-      {{ species.light }}
+      {{ formatEnum(species.light) }}
     </el-row>
     <el-row :gutter="20">
       <h3>Planted</h3>
     </el-row>
-    <el-row v-for="plant in species.plants" :key="plant.id" :gutter="20">
-      <el-col :span="16">{{ plant.garden }}</el-col>
-      <el-col :span="8">{{ plantDate(plant) }}</el-col>
-    </el-row>
+    <PlantList v-if="plants" :plants="plants"></PlantList>
   </el-container>
 </template>
 

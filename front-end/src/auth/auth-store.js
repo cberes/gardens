@@ -1,3 +1,5 @@
+import authService from './auth-service'
+
 const state = {
   authToken: null,
   clientId: '',
@@ -23,6 +25,9 @@ const actions = {
   },
   clearRedirect ({ commit }) {
     commit('SET_REDIRECT_FROM', null)
+  },
+  currentSession () {
+    return authService.currentSession()
   }
 }
 
