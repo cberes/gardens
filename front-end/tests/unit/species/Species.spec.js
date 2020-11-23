@@ -87,6 +87,7 @@ describe('Species component', () => {
 
     await localVue.nextTick()
 
+    // the message box is created outside the component, so we can't use the wrapper
     const messageBoxes = document.getElementsByClassName('el-message-box')
     expect(messageBoxes.length).to.equal(1)
     expect(messageBoxes[0].textContent).to.include('permanently delete')

@@ -37,29 +37,37 @@ export default {
     editSpecies () {
       this.$router.push({ name: 'edit-species', params: { id: this.speciesId } })
     },
+    deleteSpeciesIfConfirmed () {
+      this.confirmDeleteSpecies()
+        .then(this.doDeleteSpecies)
+        .catch(() => console.log('canceled delete'))
+    },
     confirmDeleteSpecies () {
-      this.$confirm('This will permanently delete the plant. Continue?', 'Warning', {
+      return this.$confirm('This will permanently delete the plant. Continue?', 'Warning', {
         confirmButtonText: 'OK',
         cancelButtonText: 'Cancel',
         type: 'warning'
-      }).then(() => {
-        console.log(`deleting species ${this.speciesId}`)
-        this.deleteSpecies(this.speciesId)
-          .then(() => {
-            this.$message({
-              type: 'success',
-              message: 'Plant deleted successfully'
-            })
-
-            this.$router.push({ name: 'species-list' })
-          }).catch(() => {
-            this.$message({
-              type: 'danger',
-              message: 'Delete failed'
-            })
-          })
-      }).catch(() => {
-        console.log('canceled delete')
+      })
+    },
+    doDeleteSpecies () {
+      console.log(`deleting species ${this.speciesId}`)
+      this.deleteSpecies(this.speciesId)
+        .then(() => {
+          this.notifyDeleteSucceeded()
+          this.$router.push({ name: 'species-list' })
+        })
+        .catch(this.notifyDeleteFailed)
+    },
+    notifyDeleteSucceeded () {
+      this.$message({
+        type: 'success',
+        message: 'Plant deleted successfully'
+      })
+    },
+    notifyDeleteFailed () {
+      this.$message({
+        type: 'danger',
+        message: 'Delete failed'
       })
     },
     formatEnum (s) {
@@ -81,7 +89,7 @@ export default {
       </el-col>
       <el-col :span="4" v-if="signedIn">
         <el-button icon="el-icon-edit" circle @click="editSpecies"></el-button>
-        <el-button icon="el-icon-delete" circle @click="confirmDeleteSpecies"></el-button>
+        <el-button icon="el-icon-delete" circle @click="deleteSpeciesIfConfirmed"></el-button>
       </el-col>
     </el-row>
     <el-row :gutter="20">

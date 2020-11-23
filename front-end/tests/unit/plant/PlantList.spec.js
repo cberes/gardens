@@ -34,10 +34,6 @@ describe('Plant List', () => {
     return wrapper
   }
 
-  beforeEach(() => {
-
-  })
-
   it('renders plant list', async () => {
     const wrapper = await factory(createTestData())
 

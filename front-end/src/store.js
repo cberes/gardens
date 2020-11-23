@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import authModule from '@/auth/auth-store'
 import speciesModule from '@/species/species-store'
+import plantModule from '@/plant/plant-store'
 
 Vue.use(Vuex)
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
   },
   modules: {
     auth: authModule,
-    species: speciesModule
+    species: speciesModule,
+    plant: plantModule
   }
 })

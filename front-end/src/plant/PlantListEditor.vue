@@ -1,6 +1,5 @@
 <script>
-import authService from '@/auth/auth-service'
-import plantService from './plant-service'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'plant-list-editor',
@@ -23,7 +22,7 @@ export default {
       resultsFound: 0
     }
   },
-  calculated: {
+  computed: {
     hintVisible () {
       return this.newGarden.length > 0 && this.resultsFound === 0
     }
@@ -32,23 +31,23 @@ export default {
     this.loadGardens()
   },
   methods: {
-    async loadGardens () {
-      const session = await authService.currentSession()
-      const authToken = session.getIdToken().getJwtToken()
-      plantService.getGardens(authToken)
-        .then(result => {
-          return result.data.gardens || []
-        })
+    ...mapActions('plant', ['fetchGardens']),
+    loadGardens () {
+      this.fetchGardens()
         .catch(error => {
           console.error('Failed to get gardens', error)
           return []
         })
-        .then(gardenList => (this.gardens = gardenList))
+        .then(gardenList => (this.gardens = gardenList.map(garden => ({
+          name: garden,
+          key: garden.toLowerCase()
+        }))))
     },
     querySearch (queryString, cb) {
       const queryStringLower = queryString.toLowerCase()
       const results = this.gardens
-        .filter(it => it.toLowerCase().indexOf(queryStringLower) === 0)
+        .filter(garden => garden.key.indexOf(queryStringLower) === 0)
+        .map(garden => garden.name)
       this.resultsFound = results.length
       cb(results)
     },
@@ -64,9 +63,7 @@ export default {
     clearGarden () {
       this.newGarden = ''
     },
-    deletePlant (event) {
-      const elem = event.target.parentElement
-      const plantKey = elem && elem.dataset.plantKey
+    deletePlant (plantKey) {
       const index = this.plants.findIndex(it => it.key === plantKey)
       const plant = index !== -1 ? this.plants[index] : null
 
@@ -89,9 +86,9 @@ export default {
       <el-popover
         placement="top"
         width="200"
-        trigger="manual"
         content="Press enter to add a new garden"
-        v-model="hintVisible">
+        trigger="manual"
+        :value="hintVisible">
         <el-autocomplete
           v-model="newGarden"
           placeholder="Please input"
@@ -107,9 +104,8 @@ export default {
       <el-tag
         v-for="plant in plants"
         :key="plant.key"
-        :data-plant-key="plant.key"
         closable
-        @close="deletePlant"
+        @close="deletePlant(plant.key)"
         type="success"
         effect="plain">
         {{ plant.garden }}

@@ -59,7 +59,6 @@ describe('Species List', () => {
   const factory = async (testData) => {
     const store = mockStore(testData)
     const wrapper = mount(SpeciesList, { store, localVue })
-    // wrapper.setData({ species: createTestData(), loading: false })
 
     await localVue.nextTick()
     await localVue.nextTick()
