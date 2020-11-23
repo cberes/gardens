@@ -64,14 +64,17 @@ const actions = {
         return result.data.result
       })
   },
-  async deleteSpecies ({ commit, state, rootState }, id) {
+  async saveSpecies ({ commit }, speciesAndPlants) {
+    commit('INVALIDATE_CACHE')
+    const session = await authService.currentSession()
+    const authToken = session.getIdToken().getJwtToken()
+    return speciesService.updateSpeciesAndPlants(speciesAndPlants, authToken)
+  },
+  async deleteSpecies ({ commit }, id) {
     commit('DELETE_SPECIES', id)
     const session = await authService.currentSession()
     const authToken = session.getIdToken().getJwtToken()
     return speciesService.deleteSpecies(id, authToken)
-  },
-  invalidateCache ({ commit }) {
-    commit('INVALIDATE_CACHE')
   }
 }
 

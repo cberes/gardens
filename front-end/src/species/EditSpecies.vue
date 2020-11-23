@@ -1,7 +1,5 @@
 <script>
 import { mapActions } from 'vuex'
-import authService from '@/auth/auth-service'
-import speciesService from './species-service'
 import PlantListEditor from '@/plant/PlantListEditor'
 
 export default {
@@ -15,8 +13,13 @@ export default {
   },
   data () {
     return {
-      species: null,
-      loading: true,
+      species: {
+        light: 'FULL',
+        moisture: 'MEDIUM'
+      },
+      plants: [],
+      plantsToDelete: [],
+      loading: !!this.speciesId,
       rules: {
         name: [
           { required: true, message: 'Please enter a name', trigger: 'blur' },
@@ -36,31 +39,23 @@ export default {
   },
   mounted () {
     if (!this.speciesId) {
-      this.species = {
-        light: 'FULL',
-        moisture: 'MEDIUM',
-        plants: [],
-        plantsToDelete: []
-      }
-      this.loading = false
       return
     }
 
     this.fetchSpecies(this.speciesId)
-      .then(species => {
-        this.species = species
-        this.species.plantsToDelete = []
+      .then(result => {
+        this.species = result.species
+        this.plants.push(result.plants || [])
         this.loading = false
-        return species
       })
   },
   methods: {
-    ...mapActions('species', ['fetchSpecies', 'invalidateCache']),
-    plantDeleted (plant) {
+    ...mapActions('species', ['fetchSpecies', 'saveSpecies']),
+    deletePlant (plant) {
       this.plantsToDelete.push(plant)
     },
     onSubmit (formName) {
-      this.$refs[formName].validate((valid) => {
+      this.$refs[formName].validate(valid => {
         if (valid) {
           this.doSubmit()
         } else {
@@ -69,25 +64,30 @@ export default {
         }
       })
     },
-    async doSubmit () {
-      const session = await authService.currentSession()
-      const authToken = session.getIdToken().getJwtToken()
-      speciesService.updateSpeciesAndPlants(this.species, authToken)
+    doSubmit () {
+      this.saveSpecies(this.buildRequest())
         .then(() => {
-          this.$message({
-            type: 'success',
-            message: 'Plant saved successfully'
-          })
-
-          this.invalidateCache()
+          this.notifySaveSucceeded()
           this.$router.push({ name: 'species-list' })
         })
-        .catch(error => {
-          console.error('Error saving plant')
-          console.error(error)
-
-          this.$message.error('Uh oh, there was an error.')
-        })
+        .catch(this.notifySaveFailed)
+    },
+    buildRequest () {
+      return {
+        species: this.species,
+        plants: this.plants,
+        plantsToDelete: this.plantsToDelete
+      }
+    },
+    notifySaveSucceeded () {
+      this.$message({
+        type: 'success',
+        message: 'Plant saved successfully'
+      })
+    },
+    notifySaveFailed (error) {
+      console.error('Error saving plant', error)
+      this.$message.error('Uh oh, there was an error.')
     },
     onCancel () {
       this.$router.go(-1)
@@ -121,7 +121,7 @@ export default {
       </el-select>
     </el-form-item>
     <el-form-item label="Gardens" prop="plants">
-      <PlantListEditor v-model="species.plants" @delete="deletePlant"></PlantListEditor>
+      <PlantListEditor v-model="plants" @delete="deletePlant"></PlantListEditor>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="onSubmit">Create</el-button>
