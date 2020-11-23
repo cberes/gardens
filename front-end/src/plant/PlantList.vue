@@ -1,5 +1,5 @@
 <script>
-import moment from 'moment'
+import { format, parseISO } from 'date-fns'
 
 export default {
   name: 'plant-list',
@@ -11,7 +11,7 @@ export default {
   },
   methods: {
     plantDate (plant) {
-      return moment(plant.planted).format('YYYY/MM/DD')
+      return plant.planted ? format(parseISO(plant.planted), 'yyyy/MM/dd') : ''
     }
   }
 }
