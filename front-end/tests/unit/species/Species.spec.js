@@ -24,8 +24,8 @@ describe('Species component', () => {
 
   const mockStore = (species, signedIn) => {
     const actions = {
-      fetchSpecies: () => Promise.resolve(species),
-      deleteSpecies: (unused, id) => Promise.resolve(`deleted ${id}`)
+      fetchSpecies: () => species,
+      deleteSpecies: (unused, id) => `deleted ${id}`
     }
 
     return new Vuex.Store({
@@ -33,7 +33,7 @@ describe('Species component', () => {
         auth: {
           namespaced: true,
           actions: {
-            currentSession: () => Promise.resolve(signedIn)
+            currentSession: () => signedIn
           }
         },
         species: {

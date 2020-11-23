@@ -44,7 +44,7 @@ describe('Species List', () => {
 
   const mockStore = species => {
     const actions = {
-      fetchAllSpecies: () => Promise.resolve(species)
+      fetchAllSpecies: () => species
     }
     return new Vuex.Store({
       modules: {
