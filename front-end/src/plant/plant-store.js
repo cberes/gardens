@@ -1,4 +1,4 @@
-import authService from './auth-service'
+import authService from '@/auth/auth-service'
 import plantService from './plant-service'
 
 const state = {
