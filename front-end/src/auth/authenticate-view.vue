@@ -8,7 +8,7 @@ export default {
 </script>
 
 <template>
-  <Layout>
+  <Layout :includeAuthButton="false">
     <Authenticate></Authenticate>
   </Layout>
 </template>

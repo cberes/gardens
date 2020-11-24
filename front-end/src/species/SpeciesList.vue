@@ -65,7 +65,7 @@ export default {
       this.$router.push({ name: 'species', params: { id } })
     },
     addSpecies () {
-      this.$router.push({ name: 'edit-species' })
+      this.$router.push({ name: 'add-species' })
     }
   }
 }
@@ -73,7 +73,7 @@ export default {
 
 <template>
   <el-container direction="vertical">
-    <el-row>
+    <el-row class="buttons">
       <el-button @click="clearFilter">Reset filters</el-button>
       <el-button @click="addSpecies">Add plant</el-button>
     </el-row>
@@ -118,5 +118,9 @@ export default {
 
 .error {
   color: #660000;
+}
+
+.buttons {
+  text-align: right;
 }
 </style>

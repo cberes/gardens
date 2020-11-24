@@ -6,13 +6,17 @@ export default {
       type: String,
       default: ''
     }
+  },
+  computed: {
+    titleOrDefault () {
+      return this.title || 'Your plants'
+    }
   }
 }
 </script>
 
 <template>
-  <h1 v-if="title">{{ title }}</h1>
-  <h1 v-else>Your plants</h1>
+  <h1><router-link to="/">{{ titleOrDefault }}</router-link></h1>
 </template>
 
 <style scoped>

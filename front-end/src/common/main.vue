@@ -1,61 +1,60 @@
 <script>
 import Footer from './footer'
 import Header from './header'
-import NavBar from './nav-bar'
+import AuthenticateButton from '@/auth/AuthenticateButton'
 
 export default {
-  components: { Footer, Header, NavBar },
+  components: { Footer, Header, AuthenticateButton },
   props: {
     title: {
       type: String,
       default: ''
+    },
+    includeAuthButton: {
+      type: Boolean,
+      default: true
     }
   },
   data () {
     return {
       menuOpen: false
     }
-  },
-  computed: {
-    menuIcon () {
-      return this.menuOpen ? 'el-icon-close' : 'el-icon-menu'
-    }
   }
 }
 </script>
 
 <template>
-  <el-container>
-    <el-header>
-      <el-button class="hidden-md-and-up" type="text" :icon="menuIcon" @click="menuOpen = !menuOpen"></el-button>
-      <Header :title="title"></Header>
-    </el-header>
-    <el-container>
-      <el-aside width="200px" class="hidden-sm-and-down">
-        <NavBar/>
+  <el-container class="main">
+    <el-container direction="horizontal">
+      <el-header>
+        <Header :title="title"></Header>
+      </el-header>
+      <el-aside class="aside-auth" width="200px">
+        <AuthenticateButton v-if="includeAuthButton"></AuthenticateButton>
       </el-aside>
-      <el-container>
-        <el-aside width="100%" class="hidden-md-and-up" v-if="menuOpen">
-          <NavBar/>
-        </el-aside>
-        <el-main>
-          <slot/>
-        </el-main>
-        <el-footer>
-          <Footer></Footer>
-        </el-footer>
-      </el-container>
     </el-container>
+    <el-main>
+      <slot/>
+    </el-main>
+    <el-footer>
+      <Footer></Footer>
+    </el-footer>
   </el-container>
 </template>
 
 <style scoped>
-.el-header button, .el-header button:active, .el-header button:focus {
-  outline: none;
-  float: left;
-  font-size: 2em;
-  margin: 0.67em 0.33em 0.67em 0;
-  padding: 0;
-  color: #000000;
+.main {
+  max-width: 60em;
+  margin: 2vh auto 2vh;
+}
+.aside-auth {
+  text-align: right;
+  margin: 2vh 0 0 auto;
+}
+.el-main {
+  padding: 1em 0;
+}
+.el-footer {
+  margin-top: 8vh;
 }
 </style>

@@ -16,6 +16,12 @@ export default [
     props: true
   },
   {
+    path: '/plant/add',
+    name: 'add-species',
+    component: require('./species-edit-view').default,
+    props: true
+  },
+  {
     path: '/plant/edit/:id',
     name: 'edit-species',
     component: require('./species-edit-view').default,
