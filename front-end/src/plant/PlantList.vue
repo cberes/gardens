@@ -19,7 +19,7 @@ export default {
 
 <template>
   <el-container v-if="plants.length > 0">
-    <el-row v-for="plant in plants" :key="plant.id" :gutter="20">
+    <el-row v-for="plant in plants" :key="plant.id">
       <el-col :span="16">{{ plant.garden }}</el-col>
       <el-col :span="8">{{ plantDate(plant) }}</el-col>
     </el-row>

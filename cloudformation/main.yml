@@ -238,7 +238,7 @@ Resources:
           APP_ENV_NAME: !Ref EnvironmentName
       MemorySize: 256 # megabytes
       Role: !GetAtt WebAppLambdaRole.Arn
-      Runtime: provided
+      Runtime: java11
       Timeout: 120
       TracingConfig:
         Mode: Active

@@ -82,8 +82,8 @@ export default {
 </script>
 
 <template>
-  <el-container v-loading="loading" v-if="species">
-    <el-row :gutter="20">
+  <el-container direction="vertical" v-loading="loading" v-if="species">
+    <el-row>
       <el-col :span="20">
         <h2>Plant</h2>
       </el-col>
@@ -92,19 +92,19 @@ export default {
         <el-button icon="el-icon-delete" circle @click="deleteSpeciesIfConfirmed"></el-button>
       </el-col>
     </el-row>
-    <el-row :gutter="20">
+    <el-row>
       {{ species.name }}
     </el-row>
-    <el-row :gutter="20" class="alt-name">
+    <el-row class="alt-name">
       {{ species.alternateName }}
     </el-row>
-    <el-row :gutter="20">
+    <el-row>
       {{ formatEnum(species.moisture) }}
     </el-row>
-    <el-row :gutter="20">
+    <el-row>
       {{ formatEnum(species.light) }}
     </el-row>
-    <el-row :gutter="20">
+    <el-row>
       <h3>Planted</h3>
     </el-row>
     <PlantList v-if="plants" :plants="plants"></PlantList>

@@ -11,12 +11,7 @@ export default {
   },
   data () {
     return {
-      plants: this.value.map(plant => {
-        return {
-          ...plant,
-          key: plant.id
-        }
-      }),
+      plants: this.createPlants(this.value),
       gardens: null,
       newGarden: '',
       resultsFound: 0
@@ -25,6 +20,11 @@ export default {
   computed: {
     hintVisible () {
       return this.newGarden.length > 0 && this.resultsFound === 0
+    }
+  },
+  watch: {
+    value (newValue, oldValue) {
+      this.plants = this.createPlants(newValue)
     }
   },
   mounted () {
@@ -39,9 +39,17 @@ export default {
           return []
         })
         .then(gardenList => (this.gardens = gardenList.map(garden => ({
-          name: garden,
-          key: garden.toLowerCase()
+          name: garden.name,
+          key: garden.name.toLowerCase()
         }))))
+    },
+    createPlants (elems) {
+      return elems.map(plant => {
+        return {
+          ...plant,
+          key: plant.id
+        }
+      })
     },
     querySearch (queryString, cb) {
       const queryStringLower = queryString.toLowerCase()
@@ -81,15 +89,16 @@ export default {
 </script>
 
 <template>
-  <el-container>
+  <el-container direction="vertical">
     <el-row>
       <el-popover
-        placement="top"
+        placement="right"
         width="200"
         content="Press enter to add a new garden"
         trigger="manual"
         :value="hintVisible">
         <el-autocomplete
+          slot="reference"
           v-model="newGarden"
           placeholder="Please input"
           v-on:keyup.enter="enterPressed"

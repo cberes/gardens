@@ -45,9 +45,14 @@ export default {
     this.fetchSpecies(this.speciesId)
       .then(result => {
         this.species = result.species
-        this.plants.push(result.plants || [])
+        this.plants.push.apply(this.plants, result.plants || [])
         this.loading = false
       })
+  },
+  computed: {
+    submitText () {
+      return this.species && this.species.id ? 'Update' : 'Create'
+    }
   },
   methods: {
     ...mapActions('species', ['fetchSpecies', 'saveSpecies']),
@@ -97,7 +102,7 @@ export default {
 </script>
 
 <template>
-  <el-form ref="form" :model="species" :rules="rules" label-width="120px">
+  <el-form ref="form" :model="species" :rules="rules" label-width="200px">
     <el-form-item label="Plant name" prop="name">
       <el-input v-model="species.name" placeholder="plant's most common name"></el-input>
     </el-form-item>
@@ -124,7 +129,7 @@ export default {
       <PlantListEditor v-model="plants" @delete="deletePlant"></PlantListEditor>
     </el-form-item>
     <el-form-item>
-      <el-button type="primary" @click="onSubmit">Create</el-button>
+      <el-button type="primary" @click="onSubmit('form')">{{ submitText }}</el-button>
       <el-button @click="onCancel">Cancel</el-button>
     </el-form-item>
   </el-form>

@@ -24,7 +24,7 @@ describe('Plant List Editor', () => {
 
   const mockStore = (gardens) => {
     const actions = {
-      fetchGardens: () => gardens
+      fetchGardens: () => gardens.map(name => ({ name }))
     }
 
     return new Vuex.Store({
