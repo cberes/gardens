@@ -24,7 +24,15 @@ export default {
     AmplifyEventBus.$off('authState')
   },
   methods: {
-    ...mapActions('auth', ['currentSession']),
+    ...mapActions('auth', ['currentSession', 'signOut']),
+    doSignOut () {
+      this.signOut()
+        .then(() => {
+          this.signedIn = false
+          this.goHome()
+        })
+        .catch(console.error)
+    },
     goHome () {
       this.$router.push({ name: 'home' })
     },
@@ -36,7 +44,7 @@ export default {
 </script>
 
 <template>
-  <amplify-sign-out v-if="signedIn"></amplify-sign-out>
+  <el-button v-if="signedIn" @click="doSignOut">Sign Out</el-button>
   <el-button v-else @click="goAuth">Sign In</el-button>
 </template>
 

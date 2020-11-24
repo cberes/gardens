@@ -28,6 +28,9 @@ const actions = {
   },
   currentSession () {
     return authService.currentSession()
+  },
+  signOut () {
+    return authService.signOut()
   }
 }
 
