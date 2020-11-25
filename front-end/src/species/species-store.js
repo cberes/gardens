@@ -18,7 +18,7 @@ const mutations = {
   },
   DELETE_SPECIES (state, id) {
     if (state.allSpecies) {
-      const index = state.allSpecies.findIndex(it => it.id === id)
+      const index = state.allSpecies.findIndex(it => it.species.id === id)
       if (index !== -1) {
         state.allSpecies.splice(index, 1)
       }
@@ -49,7 +49,7 @@ const actions = {
       })
   },
   async fetchSpecies ({ commit, state, rootState }, id) {
-    const found = (state.allSpecies || []).find(it => it.id === id)
+    const found = (state.allSpecies || []).find(it => it.species.id === id)
 
     if (found) {
       return Promise.resolve(found)
@@ -75,6 +75,9 @@ const actions = {
     const session = await authService.currentSession()
     const authToken = session.getIdToken().getJwtToken()
     return speciesService.deleteSpecies(id, authToken)
+  },
+  invalidateCache ({ commit }) {
+    commit('INVALIDATE_CACHE')
   }
 }
 

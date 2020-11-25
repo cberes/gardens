@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapState } from 'vuex'
-import { AmplifyEventBus } from 'aws-amplify-vue'
+import { Hub } from 'aws-amplify'
 import _ from 'lodash'
 
 export default {
@@ -13,20 +13,23 @@ export default {
     }
   },
   created () {
-    AmplifyEventBus.$on('authState', info => {
-      if (info === 'signedIn') {
-        this.redirectAfterLogin()
-      }
-    })
+    Hub.listen('auth', this.authStateChanged)
   },
   beforeDestroy () {
-    AmplifyEventBus.$off('authState')
+    Hub.remove('auth', this.authStateChanged)
   },
   computed: {
     ...mapState('auth', ['redirectFrom'])
   },
   methods: {
     ...mapActions('auth', ['clearRedirect']),
+    ...mapActions('species', ['invalidateCache']),
+    authStateChanged (data) {
+      if (data.payload.event === 'signIn') {
+        this.invalidateCache()
+        this.redirectAfterLogin()
+      }
+    },
     redirectAfterLogin () {
       if (this.redirectFrom) {
         const next = _.cloneDeep(this.redirectFrom)

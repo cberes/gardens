@@ -1,6 +1,5 @@
 <script>
 import { mapActions } from 'vuex'
-import { AmplifyEventBus } from 'aws-amplify-vue'
 
 export default {
   name: 'authenticate',
@@ -12,26 +11,19 @@ export default {
   created () {
     this.currentSession()
       .then(session => (this.signedIn = !!session))
-
-    AmplifyEventBus.$on('authState', info => {
-      if (info === 'signedOut') {
-        this.signedIn = false
-        this.goHome()
-      }
-    })
-  },
-  beforeDestroy () {
-    AmplifyEventBus.$off('authState')
   },
   methods: {
     ...mapActions('auth', ['currentSession', 'signOut']),
+    ...mapActions('species', ['invalidateCache']),
     doSignOut () {
+      this.invalidateCache() // TODO would be nice if this happened after sign out but before the event
       this.signOut()
-        .then(() => {
-          this.signedIn = false
-          this.goHome()
-        })
+        .then(this.afterSignOut)
         .catch(console.error)
+    },
+    afterSignOut () {
+      this.signedIn = false
+      this.goHome()
     },
     goHome () {
       this.$router.push({ name: 'home' })

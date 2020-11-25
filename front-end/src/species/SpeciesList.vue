@@ -1,5 +1,6 @@
 <script>
 import { mapActions } from 'vuex'
+import { Hub } from 'aws-amplify'
 
 export default {
   name: 'species-list',
@@ -10,12 +11,14 @@ export default {
       loading: true
     }
   },
+  created () {
+    Hub.listen('auth', this.authStateChanged)
+  },
+  beforeDestroy () {
+    Hub.remove('auth', this.authStateChanged)
+  },
   mounted () {
-    this.fetchAllSpecies()
-      .then(species => {
-        this.species = species
-        this.loading = false
-      })
+    this.loadAllSpecies()
   },
   computed: {
     gardenFilters () {
@@ -44,7 +47,22 @@ export default {
     }
   },
   methods: {
-    ...mapActions('species', ['fetchAllSpecies']),
+    ...mapActions('species', ['fetchAllSpecies', 'invalidateCache']),
+    authStateChanged (data) {
+      if (data.payload.event === 'signOut') {
+        this.invalidateCache()
+        this.loadAllSpecies()
+      }
+    },
+    loadAllSpecies () {
+      this.loading = true
+      this.fetchAllSpecies()
+        .then(species => {
+          this.species = species
+          this.loading = false
+        })
+        .catch(console.error)
+    },
     formatArray (row, column, value) {
       if (value.length === 0) {
         return ''
