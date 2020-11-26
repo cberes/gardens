@@ -43,15 +43,16 @@ describe('Species List', () => {
   ]
 
   const mockStore = species => {
-    const actions = {
-      fetchAllSpecies: () => species
+    const speciesModule = {
+      namespaced: true,
+      actions: {
+        fetchAllSpecies: () => species
+      }
     }
+
     return new Vuex.Store({
       modules: {
-        species: {
-          namespaced: true,
-          actions
-        }
+        species: speciesModule
       }
     })
   }

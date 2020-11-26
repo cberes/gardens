@@ -23,23 +23,25 @@ describe('Species component', () => {
   })
 
   const mockStore = (species, signedIn) => {
-    const actions = {
-      fetchSpecies: () => species,
-      deleteSpecies: (unused, id) => `deleted ${id}`
+    const auth = {
+      namespaced: true,
+      actions: {
+        currentSession: () => signedIn
+      }
+    }
+
+    const speciesModule = {
+      namespaced: true,
+      actions: {
+        fetchSpecies: () => species,
+        deleteSpecies: (unused, id) => `deleted ${id}`
+      }
     }
 
     return new Vuex.Store({
       modules: {
-        auth: {
-          namespaced: true,
-          actions: {
-            currentSession: () => signedIn
-          }
-        },
-        species: {
-          namespaced: true,
-          actions
-        }
+        auth,
+        species: speciesModule
       }
     })
   }

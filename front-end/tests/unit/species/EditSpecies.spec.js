@@ -23,26 +23,28 @@ describe('Species editor', () => {
   })
 
   const mockStore = (species, saveSpecies) => {
-    const actions = {
-      fetchSpecies: () => species,
-      saveSpecies: (unused, request) => {
-        saveSpecies && saveSpecies(request)
-        return true
+    const plant = {
+      namespaced: true,
+      actions: {
+        fetchGardens: () => []
+      }
+    }
+
+    const speciesModule = {
+      namespaced: true,
+      actions: {
+        fetchSpecies: () => species,
+        saveSpecies: (unused, request) => {
+          saveSpecies && saveSpecies(request)
+          return true
+        }
       }
     }
 
     return new Vuex.Store({
       modules: {
-        plant: {
-          namespaced: true,
-          actions: {
-            fetchGardens: () => []
-          }
-        },
-        species: {
-          namespaced: true,
-          actions
-        }
+        plant,
+        species: speciesModule
       }
     })
   }

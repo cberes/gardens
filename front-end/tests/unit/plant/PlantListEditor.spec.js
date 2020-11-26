@@ -23,16 +23,16 @@ describe('Plant List Editor', () => {
   ]
 
   const mockStore = (gardens) => {
-    const actions = {
-      fetchGardens: () => gardens.map(name => ({ name }))
+    const plant = {
+      namespaced: true,
+      actions: {
+        fetchGardens: () => gardens.map(name => ({ name }))
+      }
     }
 
     return new Vuex.Store({
       modules: {
-        plant: {
-          namespaced: true,
-          actions
-        }
+        plant
       }
     })
   }
