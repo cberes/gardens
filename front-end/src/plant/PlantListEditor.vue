@@ -55,7 +55,7 @@ export default {
       const queryStringLower = queryString.toLowerCase()
       const results = this.gardens
         .filter(garden => garden.key.indexOf(queryStringLower) === 0)
-        .map(garden => garden.name)
+        .map(garden => ({ value: garden.name }))
       this.resultsFound = results.length
       cb(results)
     },
@@ -81,7 +81,7 @@ export default {
       }
 
       if (plant && plant.id) {
-        this.$emit('delete', plant.id)
+        this.$emit('delete', plant)
       }
     }
   }

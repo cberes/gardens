@@ -30,14 +30,14 @@ public class DeleteSpeciesLambda implements ApiRequestHandler {
 
         context.getLogger().log("Authenticated username is  " + Cognito.username(input).orElse(null));
 
-        final String plantId = input.getPathParameters().get("plantId");
+        final String speciesId = input.getPathParameters().get("speciesId");
 
         final Optional<Gardener> gardener = Cognito.username(input).flatMap(gardeners::findGardenerByEmail);
         final Optional<Species> found = gardener.map(Gardener::getId).flatMap(gardenerId ->
-                species.findSpeciesById(plantId).filter(plant -> plant.getGardenerId().equals(gardenerId)));
+                species.findSpeciesById(speciesId).filter(plant -> plant.getGardenerId().equals(gardenerId)));
 
         if (found.isEmpty()) {
-            return Responses.notFound(JsonUtils.toJson(new ErrorMessage("Plant not found: " + plantId)));
+            return Responses.notFound(JsonUtils.toJson(new ErrorMessage("Plant not found: " + speciesId)));
         }
 
         species.delete(found.get());

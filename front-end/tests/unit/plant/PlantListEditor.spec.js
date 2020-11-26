@@ -83,7 +83,11 @@ describe('Plant List Editor', () => {
     closeTag(tags.at(1))
 
     expect(wrapper.emitted('delete').length).to.equal(1)
-    expect(wrapper.emitted('delete')[0]).to.deep.equal(['7b79bc5d-3b95-4764-baeb-f821c06bd30d'])
+    expect(wrapper.emitted('delete')[0]).to.deep.equal([{
+      id: '7b79bc5d-3b95-4764-baeb-f821c06bd30d',
+      key: '7b79bc5d-3b95-4764-baeb-f821c06bd30d',
+      garden: 'Side'
+    }])
   })
 
   it('sends input event when saved plant is deleted', async () => {
@@ -123,7 +127,7 @@ describe('Plant List Editor', () => {
         localVue.nextTick().then(() => {
           // TODO can I test this without calling the method?
           wrapper.vm.querySearch('Ba', results => {
-            expect(results).to.deep.equal(['Back', 'Back corner'])
+            expect(results).to.deep.equal([{ value: 'Back' }, { value: 'Back corner' }])
             done()
           })
         })

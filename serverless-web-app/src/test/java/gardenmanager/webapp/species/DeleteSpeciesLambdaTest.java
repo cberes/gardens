@@ -54,7 +54,7 @@ public class DeleteSpeciesLambdaTest {
     private APIGatewayProxyRequestEvent execute(final String email, final String speciesId) {
         final APIGatewayProxyRequestEvent input = new APIGatewayProxyRequestEvent();
         MockCognito.mockUsername(input, email);
-        MockParameters.mockPathParam(input, "plantId", speciesId);
+        MockParameters.mockPathParam(input, "speciesId", speciesId);
         return input;
     }
 

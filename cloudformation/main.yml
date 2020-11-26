@@ -314,7 +314,7 @@ Resources:
       Code:
         S3Bucket: !Ref StagingBucketName
         S3Key: !Join ['/', ['web-app-dist', !Ref LambdaBundleName]]
-      Handler: gardenmanager.webapp.Lambdas$LiveEditPlantsLambda::handleRequest
+      Handler: gardenmanager.webapp.Lambdas$LiveDeleteSpeciesLambda::handleRequest
       Layers:
         - !Ref RuntimeClassPathLambdaLayer
       Environment:
