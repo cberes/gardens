@@ -70,7 +70,20 @@ describe('Plant List Editor', () => {
     const wrapper = await factory(createTestData())
 
     const tags = wrapper.findAll('.el-tag')
+    expect(tags.length).to.equal(2)
+    expect(tags.at(0).text()).to.equal('Front')
+    expect(tags.at(1).text()).to.equal('Side')
+  })
 
+  it('renders updated plant list', async () => {
+    const wrapper = await factory([])
+    expect(wrapper.find('.el-tag').exists()).to.equal(false)
+
+    wrapper.setProps({ value: createTestData() })
+
+    await localVue.nextTick()
+
+    const tags = wrapper.findAll('.el-tag')
     expect(tags.length).to.equal(2)
     expect(tags.at(0).text()).to.equal('Front')
     expect(tags.at(1).text()).to.equal('Side')
