@@ -2,7 +2,7 @@
 import { mapActions } from 'vuex'
 
 export default {
-  name: 'authenticate',
+  name: 'authenticate-button',
   data () {
     return {
       signedIn: false
