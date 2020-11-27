@@ -1,6 +1,12 @@
-.DS_Store
+# Project-specific nonsense
+src/config/*.js
+
+# Javascript trash
 node_modules
 /dist
+
+# OS-specific rubbish
+.DS_Store
 
 # local env files
 .env.local
