@@ -79,12 +79,14 @@ export default {
     },
     doDeleteSpecies () {
       console.log(`deleting species ${this.speciesId}`)
+      this.loading = true
       this.deleteSpecies(this.speciesId)
         .then(() => {
           this.notifyDeleteSucceeded()
           this.$router.push({ name: 'species-list' })
         })
         .catch(this.notifyDeleteFailed)
+        .finally(() => (this.loading = false))
     },
     notifyDeleteSucceeded () {
       this.$message({
@@ -112,19 +114,25 @@ export default {
 <template>
   <el-container direction="vertical" v-loading="loading" v-if="species">
     <el-row>
-      <h2>{{ species.name }}</h2>
       <div id="edit-buttons" v-if="signedIn">
         <el-button icon="el-icon-edit" circle @click="editSpecies"></el-button>
         <el-button icon="el-icon-delete" circle @click="deleteSpeciesIfConfirmed"></el-button>
       </div>
+      <h2>{{ species.name }}</h2>
     </el-row>
     <el-row :gutter="10">
-      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
+      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8" v-if="species.alternateName">
         <el-card shadow="hover" class="box-card">
           <div slot="header" class="clearfix card-header">Also known as</div>
           <div class="card-body">
             {{ species.alternateName }}
           </div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
+        <el-card shadow="hover" class="box-card">
+          <div slot="header" class="clearfix card-header">Planted</div>
+          <PlantList v-if="plants" :plants="plants" noneText="Get to planting!" class="card-body"></PlantList>
         </el-card>
       </el-col>
       <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
@@ -143,12 +151,6 @@ export default {
             <el-progress type="circle" :percentage="lightPercent" status="warning" :show-text="false"></el-progress>
             <div>{{ formatEnum(species.light) }}</div>
           </div>
-        </el-card>
-      </el-col>
-      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
-        <el-card shadow="hover" class="box-card">
-          <div slot="header" class="clearfix card-header">Planted</div>
-          <PlantList v-if="plants" :plants="plants" class="card-body"></PlantList>
         </el-card>
       </el-col>
     </el-row>

@@ -7,6 +7,10 @@ export default {
     plants: {
       type: Array,
       required: true
+    },
+    noneText: {
+      type: String,
+      default: 'None'
     }
   },
   methods: {
@@ -25,7 +29,7 @@ export default {
     </el-row>
   </el-container>
   <el-row v-else>
-    None
+    {{ noneText }}
   </el-row>
 </template>
 

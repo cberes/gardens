@@ -2,21 +2,37 @@ import Vue from 'vue'
 import authService from '@/auth/auth-service'
 import speciesService from './species-service'
 
+const TTL_MINUTES = 10
+
+const expireTime = () => {
+  const date = new Date()
+  date.setMinutes(date.getMinutes() + TTL_MINUTES)
+  return date
+}
+
+const getAuthToken = async () => {
+  const session = await authService.currentSession()
+  return session.getIdToken().getJwtToken()
+}
+
 const state = {
-  allSpecies: null
+  allSpecies: null,
+  allSpeciesExpires: Date.now(),
+  cache: {}
 }
 
 const mutations = {
   SET_ALL_SPECIES (state, newValue) {
     Vue.set(state, 'allSpecies', newValue)
+    Vue.set(state, 'allSpeciesExpires', expireTime())
   },
   ADD_SPECIES (state, newValue) {
-    if (!state.allSpecies) {
-      Vue.set(state, 'allSpecies', [])
-    }
-    state.allSpecies.push(newValue)
+    Vue.set(state.cache, newValue.species.id, newValue)
   },
   DELETE_SPECIES (state, id) {
+    Vue.delete(state.cache, id)
+  },
+  DELETE_FROM_ALL_SPECIES (state, id) {
     if (state.allSpecies) {
       const index = state.allSpecies.findIndex(it => it.species.id === id)
       if (index !== -1) {
@@ -31,17 +47,18 @@ const mutations = {
 
 const actions = {
   async fetchAllSpecies ({ commit, state, rootState }) {
-    if (state.allSpecies) {
+    if (state.allSpecies && Date.now() <= state.allSpeciesExpires) {
       return Promise.resolve(state.allSpecies)
     }
 
-    const session = await authService.currentSession()
-    const authToken = session && session.getIdToken().getJwtToken()
+    const authToken = await getAuthToken()
 
     return speciesService.getAllSpecies(authToken)
-      .then(result => {
-        commit('SET_ALL_SPECIES', result.data.results)
-        return result.data.results || []
+      .then(result => result.data.results || [])
+      .then(results => {
+        commit('SET_ALL_SPECIES', results)
+        results.forEach(it => commit('ADD_SPECIES', it))
+        return results
       })
       .catch(error => {
         console.error('Failed to get all species', error)
@@ -49,14 +66,13 @@ const actions = {
       })
   },
   async fetchSpecies ({ commit, state, rootState }, id) {
-    const found = (state.allSpecies || []).find(it => it.species.id === id)
+    const found = state.cache[id]
 
     if (found) {
       return Promise.resolve(found)
     }
 
-    const session = await authService.currentSession()
-    const authToken = session && session.getIdToken().getJwtToken()
+    const authToken = await getAuthToken()
 
     return speciesService.getSpecies(id, authToken)
       .then(result => {
@@ -66,14 +82,13 @@ const actions = {
   },
   async saveSpecies ({ commit }, speciesAndPlants) {
     commit('INVALIDATE_CACHE')
-    const session = await authService.currentSession()
-    const authToken = session.getIdToken().getJwtToken()
+    const authToken = await getAuthToken()
     return speciesService.updateSpeciesAndPlants(speciesAndPlants, authToken)
   },
   async deleteSpecies ({ commit }, id) {
     commit('DELETE_SPECIES', id)
-    const session = await authService.currentSession()
-    const authToken = session.getIdToken().getJwtToken()
+    commit('DELETE_FROM_ALL_SPECIES', id)
+    const authToken = await getAuthToken()
     return speciesService.deleteSpecies(id, authToken)
   },
   invalidateCache ({ commit }) {

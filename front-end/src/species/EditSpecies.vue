@@ -70,12 +70,14 @@ export default {
       })
     },
     doSubmit () {
+      this.loading = true
       this.saveSpecies(this.buildRequest())
         .then(() => {
           this.notifySaveSucceeded()
           this.$router.push({ name: 'species-list' })
         })
         .catch(this.notifySaveFailed)
+        .finally(() => (this.loading = false))
     },
     buildRequest () {
       return {
