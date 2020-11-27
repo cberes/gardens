@@ -29,9 +29,9 @@ export default {
       <el-header>
         <Header :title="title"></Header>
       </el-header>
-      <el-aside class="aside-auth" width="200px">
+      <div class="aside-auth">
         <AuthenticateButton v-if="includeAuthButton"></AuthenticateButton>
-      </el-aside>
+      </div>
     </el-container>
     <el-main>
       <slot/>
@@ -49,10 +49,8 @@ export default {
 }
 .aside-auth {
   text-align: right;
-  margin: 2vh 0 0 auto;
-}
-.el-main {
-  padding: 1em 0;
+  margin: 2vh 2vh 0 auto;
+  float: right;
 }
 .el-footer {
   margin-top: 8vh;

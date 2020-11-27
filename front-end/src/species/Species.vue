@@ -31,6 +31,34 @@ export default {
         this.loading = false
       })
   },
+  computed: {
+    moisturePercent () {
+      switch (this.species && this.species.moisture) {
+        case 'WET':
+          return 100
+        case 'MEDIUM_WET':
+          return 80
+        case 'MEDIUM':
+          return 60
+        case 'MEDIUM_DRY':
+          return 40
+        case 'DRY':
+        default:
+          return 20
+      }
+    },
+    lightPercent () {
+      switch (this.species && this.species.light) {
+        case 'FULL':
+          return 100
+        case 'PARTIAL':
+          return 66
+        case 'SHADE':
+        default:
+          return 33
+      }
+    }
+  },
   methods: {
     ...mapActions('auth', ['currentSession']),
     ...mapActions('species', ['deleteSpecies', 'fetchSpecies']),
@@ -84,35 +112,75 @@ export default {
 <template>
   <el-container direction="vertical" v-loading="loading" v-if="species">
     <el-row>
-      <el-col :span="20">
-        <h2>Plant</h2>
-      </el-col>
-      <el-col :span="4" v-if="signedIn">
+      <h2>{{ species.name }}</h2>
+      <div id="edit-buttons" v-if="signedIn">
         <el-button icon="el-icon-edit" circle @click="editSpecies"></el-button>
         <el-button icon="el-icon-delete" circle @click="deleteSpeciesIfConfirmed"></el-button>
+      </div>
+    </el-row>
+    <el-row :gutter="10">
+      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
+        <el-card shadow="hover" class="box-card">
+          <div slot="header" class="clearfix card-header">Also known as</div>
+          <div class="card-body">
+            {{ species.alternateName }}
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
+        <el-card shadow="hover" class="box-card">
+          <div slot="header" class="clearfix card-header">Soil moisture</div>
+          <div class="card-body percent">
+            <el-progress type="circle" :percentage="moisturePercent" :show-text="false"></el-progress>
+            <div>{{ formatEnum(species.moisture) }}</div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
+        <el-card shadow="hover" class="box-card">
+          <div slot="header" class="clearfix card-header">Sun</div>
+          <div class="card-body percent">
+            <el-progress type="circle" :percentage="lightPercent" status="warning" :show-text="false"></el-progress>
+            <div>{{ formatEnum(species.light) }}</div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :xs="24" :sm="24" :md="12" :lg="8" :xl="8">
+        <el-card shadow="hover" class="box-card">
+          <div slot="header" class="clearfix card-header">Planted</div>
+          <PlantList v-if="plants" :plants="plants" class="card-body"></PlantList>
+        </el-card>
       </el-col>
     </el-row>
-    <el-row>
-      {{ species.name }}
-    </el-row>
-    <el-row class="alt-name">
-      {{ species.alternateName }}
-    </el-row>
-    <el-row>
-      {{ formatEnum(species.moisture) }}
-    </el-row>
-    <el-row>
-      {{ formatEnum(species.light) }}
-    </el-row>
-    <el-row>
-      <h3>Planted</h3>
-    </el-row>
-    <PlantList v-if="plants" :plants="plants"></PlantList>
   </el-container>
 </template>
 
 <style scoped>
 .alt-name {
   font-style: italic;
+  padding-left: 2em;
+}
+#edit-buttons {
+  text-align: right;
+  float: right;
+}
+.el-card {
+  margin-bottom: 1vh;
+}
+.card-header {
+  font-weight: bold;
+}
+.clearfix:before, .clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both
+}
+.card-body {
+  font-size: 18px;
+}
+.percent {
+  text-align: center;
 }
 </style>

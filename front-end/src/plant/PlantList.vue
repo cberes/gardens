@@ -21,7 +21,7 @@ export default {
   <el-container direction="vertical" v-if="plants.length > 0">
     <el-row v-for="plant in plants" :key="plant.id">
       <el-col :span="16">{{ plant.garden }}</el-col>
-      <el-col :span="8">{{ plantDate(plant) }}</el-col>
+      <el-col :span="8" class="plant-date">{{ plantDate(plant) }}</el-col>
     </el-row>
   </el-container>
   <el-row v-else>
@@ -30,4 +30,7 @@ export default {
 </template>
 
 <style scoped>
+.plant-date {
+  font-style: italic;
+}
 </style>
