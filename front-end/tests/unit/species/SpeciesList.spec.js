@@ -45,7 +45,14 @@ describe('Species List', () => {
   const createTestData = () => createData(['Early Sunflower', 'Purple Coneflower', 'Wild Bergamot', 'Yarrow'])
   const createAltTestData = () => createData(['Common Milkweed', 'Virginia Bluebells', 'Wild Ginger', 'Silver Maple'])
 
-  const mockStore = species => {
+  const mockStore = (species, signedIn) => {
+    const auth = {
+      namespaced: true,
+      actions: {
+        currentSession: () => signedIn
+      }
+    }
+
     const speciesModule = {
       namespaced: true,
       actions: {
@@ -56,6 +63,7 @@ describe('Species List', () => {
 
     return new Vuex.Store({
       modules: {
+        auth,
         species: speciesModule
       }
     })
@@ -66,8 +74,8 @@ describe('Species List', () => {
     await localVue.nextTick()
   }
 
-  const factory = async (testData) => {
-    const store = mockStore(testData)
+  const factory = async (testData, signedIn) => {
+    const store = mockStore(testData, signedIn)
     const wrapper = mount(SpeciesList, { store, localVue })
 
     await waitForTable()
@@ -126,5 +134,17 @@ describe('Species List', () => {
     const wrapper = await factory([])
 
     expect(wrapper.text()).to.include('Click Add plant')
+  })
+
+  it('hides intro message when the user is signed in', async () => {
+    const wrapper = await factory([], true)
+
+    expect(wrapper.find('.intro').exists()).to.equal(false)
+  })
+
+  it('displays intro message when the user is signed out', async () => {
+    const wrapper = await factory([], false)
+
+    expect(wrapper.find('.intro').exists()).to.equal(true)
   })
 })

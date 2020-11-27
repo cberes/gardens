@@ -7,12 +7,16 @@ export default {
   data () {
     return {
       species: [],
+      signedIn: false,
       error: null,
       loading: true
     }
   },
   created () {
     Hub.listen('auth', this.authStateChanged)
+
+    this.currentSession()
+      .then(session => (this.signedIn = !!session))
   },
   beforeDestroy () {
     Hub.remove('auth', this.authStateChanged)
@@ -47,11 +51,13 @@ export default {
     }
   },
   methods: {
+    ...mapActions('auth', ['currentSession']),
     ...mapActions('species', ['fetchAllSpecies', 'invalidateCache']),
     authStateChanged (data) {
       if (data.payload.event === 'signOut') {
         this.invalidateCache()
         this.loadAllSpecies()
+        this.signedIn = false
       }
     },
     loadAllSpecies () {
@@ -91,6 +97,10 @@ export default {
 
 <template>
   <el-container direction="vertical">
+    <el-row  class="intro" v-if="!signedIn">
+      <p><em>Flower Companion</em> helps you manage your plant collection!</p>
+      <p>Take a look at the example list of plants below, or <strong>Sign In</strong> to add your own plants.</p>
+    </el-row >
     <el-row class="buttons">
       <el-button @click="clearFilter">Reset filters</el-button>
       <el-button @click="addSpecies">Add plant</el-button>
@@ -136,6 +146,10 @@ export default {
 
 .error {
   color: #660000;
+}
+
+.intro {
+  text-align: center;
 }
 
 .buttons {
