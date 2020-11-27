@@ -2,7 +2,28 @@ plugins {
   id 'com.moowork.node' version '1.2.0'
 }
 
-task build(type: NpmTask, dependsOn: 'npmInstall') {
+task injectConfigs(type: Copy) {
+  println(System.getenv('API_URL'))
+  from "$projectDir/config"
+  include '**/*.js'
+  into "$projectDir/src/config"
+
+  expand(
+    apiUrl: System.getenv('API_URL'),
+    awsRegion: System.getenv('AWS_REGION'),
+    awsUserPoolId: System.getenv('AWS_USER_POOL_ID'),
+    awsUserPoolClientId: System.getenv('AWS_USER_POOL_CLIENT_ID'))
+}
+
+task injectEmptyConfigs(type: Copy) {
+  from "$projectDir/config"
+  include '**/*.js'
+  into "$projectDir/src/config"
+
+  expand([:])
+}
+
+task build(type: NpmTask, dependsOn: ['npmInstall', 'injectConfigs']) {
   args = ['run', 'build']
   finalizedBy 'test'
 }
@@ -13,6 +34,6 @@ task test(type: NpmTask, dependsOn: 'npmInstall') {
 
 task check(dependsOn: 'test')
 
-task run(type: NpmTask, dependsOn: 'npmInstall') {
+task run(type: NpmTask, dependsOn: ['npmInstall', 'injectConfigs']) {
   args = ['run', 'serve']
 }
