@@ -3,7 +3,6 @@ plugins {
 }
 
 task injectConfigs(type: Copy) {
-  println(System.getenv('API_URL'))
   from "$projectDir/config"
   include '**/*.js'
   into "$projectDir/src/config"
