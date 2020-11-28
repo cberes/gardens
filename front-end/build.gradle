@@ -44,12 +44,12 @@ task run(type: NpmTask, dependsOn: ['npmInstall', 'injectConfigs']) {
 
 task copyDist(type: Copy) {
   from "$projectDir/dist"
-  into projectDir
+  into rootDir
 }
 
 task copyPublic(type: Copy) {
   from "$projectDir/public"
-  into projectDir
+  into rootDir
 }
 
 task checkoutGithubPagesBranch(type: Exec, dependsOn: ['copyDist', 'copyPublic']) {
