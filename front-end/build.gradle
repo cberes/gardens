@@ -41,15 +41,3 @@ task check(dependsOn: 'test')
 task run(type: NpmTask, dependsOn: ['npmInstall', 'injectConfigs']) {
   args = ['run', 'serve']
 }
-
-task copyDist(type: Copy) {
-  from "$projectDir/dist"
-  into rootDir
-}
-
-task checkoutGithubPagesBranch(type: Exec, dependsOn: ['copyDist']) {
-  workingDir projectDir
-  commandLine 'git checkout github-pages'
-}
-
-task updateGithubPages(dependsOn: 'checkoutGithubPagesBranch')

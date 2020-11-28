@@ -52,6 +52,9 @@ export default {
   margin: 2vh 2vh 0 auto;
   float: right;
 }
+.el-header {
+  margin-top: 2vh;
+}
 .el-footer {
   margin-top: 8vh;
 }

@@ -12,7 +12,7 @@ const expireTime = () => {
 
 const getAuthToken = async () => {
   const session = await authService.currentSession()
-  return session.getIdToken().getJwtToken()
+  return session && session.getIdToken().getJwtToken()
 }
 
 const state = {
