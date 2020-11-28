@@ -9,7 +9,7 @@ import locale from 'element-ui/lib/locale/lang/en'
 // Amplify
 import Amplify, * as AmplifyModules from 'aws-amplify'
 import { AmplifyPlugin } from 'aws-amplify-vue'
-import awsConfig from './config/aws'
+import { aws as awsConfig } from './config/config'
 
 // this app ...
 import App from './App.vue'

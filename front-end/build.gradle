@@ -2,6 +2,10 @@ plugins {
   id 'com.moowork.node' version '1.2.0'
 }
 
+task clean(type: Delete) {
+  delete "$projectDir/dist", "$projectDir/src/config"
+}
+
 task injectConfigs(type: Copy) {
   from "$projectDir/config"
   include '**/*.js'
@@ -9,6 +13,7 @@ task injectConfigs(type: Copy) {
 
   expand(
     apiUrl: System.getenv('API_URL'),
+    baseUrl: System.getenv('BASE_URL'),
     awsRegion: System.getenv('AWS_REGION'),
     awsUserPoolId: System.getenv('AWS_USER_POOL_ID'),
     awsUserPoolClientId: System.getenv('AWS_USER_POOL_CLIENT_ID'))

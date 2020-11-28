@@ -1,7 +1,7 @@
 import httpService from '@/common/http-service'
-import apiConfig from '@/config/api'
+import { web as webConfig } from '@/config/config'
 
-const baseUrl = apiConfig.url + '/api/gardens'
+const baseUrl = webConfig.apiUrl + '/api/gardens'
 
 export default {
   getGardens (authToken) {

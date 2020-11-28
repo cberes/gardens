@@ -1,8 +1,8 @@
 import httpService from '@/common/http-service'
-import apiConfig from '@/config/api'
+import { web as webConfig } from '@/config/config'
 
-const baseUrl = apiConfig.url + '/api/species'
-const baseUrlPublic = apiConfig.url + '/api/public/species'
+const baseUrl = webConfig.apiUrl + '/api/species'
+const baseUrlPublic = webConfig.apiUrl + '/api/public/species'
 
 export default {
   getAllSpecies (authToken) {
