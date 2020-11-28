@@ -47,12 +47,7 @@ task copyDist(type: Copy) {
   into rootDir
 }
 
-task copyPublic(type: Copy) {
-  from "$projectDir/public"
-  into rootDir
-}
-
-task checkoutGithubPagesBranch(type: Exec, dependsOn: ['copyDist', 'copyPublic']) {
+task checkoutGithubPagesBranch(type: Exec, dependsOn: ['copyDist']) {
   workingDir projectDir
   commandLine 'git checkout github-pages'
 }
