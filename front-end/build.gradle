@@ -57,9 +57,4 @@ task checkoutGithubPagesBranch(type: Exec, dependsOn: ['copyDist', 'copyPublic']
   commandLine 'git checkout github-pages'
 }
 
-task commitAndPushChanges(type: Exec, dependsOn: 'checkoutGithubPagesBranch') {
-  workingDir projectDir
-  commandLine 'git add -A && git commit -m "update site" && git push'
-}
-
-task updateGithubPages(dependsOn: 'commitAndPushChanges')
+task updateGithubPages(dependsOn: 'checkoutGithubPagesBranch')
