@@ -41,3 +41,25 @@ task check(dependsOn: 'test')
 task run(type: NpmTask, dependsOn: ['npmInstall', 'injectConfigs']) {
   args = ['run', 'serve']
 }
+
+task checkoutGithubPagesBranch(type: Exec) {
+  workingDir projectDir
+  commandLine 'git checkout github-pages'
+}
+
+task copyDist(type: Copy, dependsOn: 'checkoutGithubPagesBranch') {
+  from "$projectDir/dist"
+  into projectDir
+}
+
+task copyPublic(type: Copy, dependsOn: 'checkoutGithubPagesBranch') {
+  from "$projectDir/public"
+  into projectDir
+}
+
+task commitAndPushChanges(type: Exec, dependsOn: ['copyDist', 'copyPublic']) {
+  workingDir projectDir
+  commandLine 'git add -A && git commit -m "update site" && git push'
+}
+
+task updateGithubPages(dependsOn: 'commitAndPushChanges')
