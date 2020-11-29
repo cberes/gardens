@@ -7,11 +7,11 @@
     <link rel="icon" type="image/png" href="<%= BASE_URL %>favicon-16x16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="<%= BASE_URL %>favicon-32x32.png" sizes="32x32">
     <link rel="icon" type="image/png" href="<%= BASE_URL %>favicon-96x96.png" sizes="96x96">
-    <title>Flower Companion</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
     <noscript>
-      <strong>We're sorry but Flower Companion doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->

@@ -9,6 +9,10 @@ These environment variables must be defined when building for production
 - `AWS_USER_POOL_ID`: Cognito user pool ID
 - `AWS_USER_POOL_CLIENT_ID`: Cognito user pool client ID
 
+Additionally these optional environment variables may be defined
+
+- `BASE_URL`: base URL for assets, e.g. `app/`
+
 ## Compile and minify for production
 ```
 gradle clean build
@@ -22,5 +26,5 @@ gradle clean run
 ### Update static website
 A script is included that will update the static website's contents.
 ```
-./update
+./update-site
 ```
