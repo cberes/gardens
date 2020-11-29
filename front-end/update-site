@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+# Updates the static website
+# Yes this makes some assumptions about where the repo is
+readonly repo_name=gardens
+
+# source the config
+. $HOME/bin/garden-setup
+
+# build the website
+readonly source_dir=$HOME/repos/$repo_name/front-end
+cd $source_dir
+../gradlew clean build -x test
+
+# clone the github-pages branch
+readonly work_dir=$(mktemp -d)
+cd $work_dir
+git clone -b github-pages git@github.com:cberes/$repo_name.git repo
+cd repo
+
+# copy from master to github-pages branch
+rm -fr css fonts js img
+cp -r $source_dir/dist/* .
+git add -A
+git commit -m "update site"
+git push
+
