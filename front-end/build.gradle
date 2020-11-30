@@ -19,14 +19,6 @@ task injectConfigs(type: Copy) {
     awsUserPoolClientId: System.getenv('AWS_USER_POOL_CLIENT_ID'))
 }
 
-task injectEmptyConfigs(type: Copy) {
-  from "$projectDir/config"
-  include '**/*.js'
-  into "$projectDir/src/config"
-
-  expand([:])
-}
-
 task build(type: NpmTask, dependsOn: ['npmInstall', 'injectConfigs']) {
   args = ['run', 'build']
   finalizedBy 'test'

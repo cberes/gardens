@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+readonly env_name="$1"
+readonly config_file="$HOME/.gardens/$env_name.conf"
+source $config_file
+export $(cut -d= -f1 $config_file)

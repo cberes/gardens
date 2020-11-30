@@ -13,6 +13,11 @@ Additionally these optional environment variables may be defined
 
 - `BASE_URL`: base URL for assets, e.g. `app/`
 
+A script is included that will export the specified environment's configuration
+```
+./setup-env <environment>
+```
+
 ## Compile and minify for production
 ```
 gradle clean build
@@ -26,5 +31,7 @@ gradle clean run
 ### Update static website
 A script is included that will update the static website's contents.
 ```
-./update-site
+./update-site <environment>
 ```
+
+It assumes there is a file containing all relevant environment variables at `~/.gardens/<environment>.conf`. For example, this file will be at ~/.gardens/live.conf for the `live` environment.
