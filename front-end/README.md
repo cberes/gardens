@@ -15,7 +15,7 @@ Additionally these optional environment variables may be defined
 
 A script is included that will export the specified environment's configuration
 ```
-./setup-env <environment>
+. ./setup-env <environment>
 ```
 
 ## Compile and minify for production
