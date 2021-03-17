@@ -16,7 +16,7 @@ gradle clean build
 ## Deployment
 ### Front-end
 
-The front-end has its own [deployment instructions](front-end/README.md).
+The front-end is deployed automatically by the CI job, but there are also [instructions for manual deployment](front-end/README.md).
 
 ### Back-end
 

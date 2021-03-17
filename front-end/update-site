@@ -12,12 +12,12 @@ export $(cut -d= -f1 $config_file)
 # assume this is run where
 ../gradlew clean build -x test
 
-# clone the github-pages branch
+# clone the gh-pages branch
 readonly work_dir=$(mktemp -d)
 readonly repo_dir="$work_dir/repo"
-git clone -b github-pages git@github.com:cberes/$repo_name.git $repo_dir
+git clone -b gh-pages git@github.com:cberes/$repo_name.git $repo_dir
 
-# copy from master to github-pages branch
+# copy from master to gh-pages branch
 rm -fr $repo_dir/css $repo_dir/fonts $repo_dir/js $repo_dir/img
 cp -r dist/* $repo_dir
 cd $repo_dir
