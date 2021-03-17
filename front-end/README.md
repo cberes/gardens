@@ -13,14 +13,9 @@ Additionally these optional environment variables may be defined
 
 - `BASE_URL`: base URL for assets, e.g. `app/`
 
-A script is included that will export the specified environment's configuration
+A script is included that will `export` the specified environment's configuration
 ```
 . ./setup-env <environment>
-```
-
-## Compile and minify for production
-```
-gradle clean build
 ```
 
 ## Compile with hot-reload for development
@@ -28,7 +23,12 @@ gradle clean build
 gradle clean run
 ```
 
-### Update static website
+## Compile and minify for production
+```
+gradle clean build
+```
+
+## Update static website
 A script is included that will update the static website's contents.
 ```
 ./update-site <environment>

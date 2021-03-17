@@ -8,6 +8,27 @@ Sure, of course, but maybe you forget the names of your plants.
 You know something is a goldenrod, but what kind of goldenrod?
 Also, you can use this app to remember seeds you've planted while you wait for their germination.
 
+## Build the project
+```
+gradle clean build
+```
+
+## Deployment
+### Front-end
+
+The front-end has its own [deployment instructions](front-end/README.md).
+
+### Back-end
+
+If you have not already, you will need to install and configure the [AWS CLI](https://aws.amazon.com/cli/).
+
+Then run the provided script with your desired environment name as the only argument. For example:
+```
+./deploy-aws live
+```
+
+This is a manual step because we may not always want to deploy to AWS.
+
 ## History
 
 This started as a [campsite manager using Spring Boot](https://github.com/cberes/campsites)
