@@ -49,7 +49,7 @@ aws cloudformation $stack_op \
   },
   {
     "ParameterKey": "DomainName",
-    "ParameterValue": "flowercompanion.com",
+    "ParameterValue": "garden.cberes.com",
     "UsePreviousValue": false
   },
   {
